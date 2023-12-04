@@ -15,10 +15,10 @@ public class BeatSaverMapDownloadTask : MyTask
 	
 	public override void Execute()
 	{
-		BeatSaverDownloadUtil.GetMapData(_mapHash, mapData =>
+		DownloadUtil.GetMapData(_mapHash, mapData =>
 		{
 			DownloadedMapData = mapData;
-			OnExecutionFinished();
+			HandleExecutionFinished();
 		});
 	}
 

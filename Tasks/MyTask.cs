@@ -5,7 +5,7 @@ public abstract class MyTask
 	public Action<MyTask>? OnFinished;
 	public abstract void Execute();
 
-	protected void OnExecutionFinished()
+	protected void HandleExecutionFinished()
 	{
 		OnFinishedInternal();
 		OnFinished?.Invoke(this);

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace BeatSaberLibraryManager.Utils
 {
-    public static class BeatSaverDownloadUtil
+    public static class DownloadUtil
     {
         public const float DownloadTimeOutDuration = 5;
 
@@ -20,18 +20,6 @@ namespace BeatSaberLibraryManager.Utils
                 fileContents = default;
                 return null;
             }
-        }
-        
-        public static BPList GetBpList(int id, out string fileContents)
-        {
-            var uri = "https://api.beatsaver.com/playlists/id/" + id + "/download";
-            return GetBpList(uri, out fileContents);
-        }
-        
-        public static BPList GetUserBpList(int userId, out string fileContents)
-        { 
-            string uri = "https://api.beatsaver.com/users/id/" + userId + "/playlist";
-            return GetBpList(uri, out fileContents);
         }
 
         /// <summary>
