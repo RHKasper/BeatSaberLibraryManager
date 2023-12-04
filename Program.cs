@@ -6,8 +6,7 @@ Console.WriteLine("Hello, World!");
 Queue<MyTask> queuedTasks = new Queue<MyTask>();
 HashSet<MyTask> runningTasks = new HashSet<MyTask>();
 
-void OnTaskOnFinished(MyTask task) => runningTasks.Remove(task);
-
+void OnTaskFinished(MyTask task) => runningTasks.Remove(task);
 
 //Enqueue initial tasks
 queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
@@ -21,7 +20,7 @@ while (queuedTasks.Any() || runningTasks.Any())
 	{
 		var task = queuedTasks.Dequeue();
 
-		task.OnFinished += OnTaskOnFinished;
+		task.OnFinished += OnTaskFinished;
 		runningTasks.Add(task);
 		task.Execute();
 	}
