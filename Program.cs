@@ -1,6 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-using BeatSaberLibraryManager.Tasks;
+﻿using BeatSaberLibraryManager.Tasks;
 
 Console.WriteLine("Hello, World!");
 
@@ -19,7 +17,7 @@ while (queuedTasks.Any() || runningTasks.Any())
 	Console.WriteLine("Waiting on " + queuedTasks.Count + " queued tasks and " + runningTasks.Count + " running tasks");
 	Thread.Sleep(150);
 	
-	if (queuedTasks.Any())
+	while (queuedTasks.Any())
 	{
 		var task = queuedTasks.Dequeue();
 
