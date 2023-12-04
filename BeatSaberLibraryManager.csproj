@@ -7,4 +7,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Aspose.Imaging" Version="23.11.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="SpotifyAPI.Web.Auth" Version="7.0.2" />
+    </ItemGroup>
+
 </Project>
