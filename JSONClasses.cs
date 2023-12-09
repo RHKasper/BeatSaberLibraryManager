@@ -7,9 +7,13 @@ public class CustomData
     public string syncURL { get; set; }
 }
 
-public class Song
+public class SongInfo
 {
-    protected bool Equals(Song other)
+    public string key { get; set; }
+    public string hash { get; set; }
+    public string songName { get; set; }
+
+    protected bool Equals(SongInfo other)
     {
         return key == other.key && hash == other.hash && songName == other.songName;
     }
@@ -19,17 +23,13 @@ public class Song
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != this.GetType()) return false;
-        return Equals((Song)obj);
+        return Equals((SongInfo)obj);
     }
 
     public override int GetHashCode()
     {
         return HashCode.Combine(key, hash, songName);
     }
-
-    public string key { get; set; }
-    public string hash { get; set; }
-    public string songName { get; set; }
 }
 
 public class BPList
@@ -39,11 +39,11 @@ public class BPList
     public string playlistDescription { get; set; }
     public string image { get; set; }
     public CustomData customData { get; set; }
-    public List<Song> songs { get; set; }
+    public List<SongInfo> songs { get; set; }
 
     public void RemoveDuplicates()
     {
-        songs = new HashSet<Song>(songs).ToList();
+        songs = new HashSet<SongInfo>(songs).ToList();
     }
 }
 
