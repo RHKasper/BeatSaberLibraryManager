@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using BeatSaberLibraryManager.Inputs;
-using BeatSaberLibraryManager.Tasks;
 
 namespace BeatSaberLibraryManager;
 
