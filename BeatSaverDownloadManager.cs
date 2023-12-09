@@ -4,9 +4,9 @@ namespace BeatSaberLibraryManager;
 
 public static class BeatSaverDownloadManager
 {
-	public static async Task<BPList> DownloadWebBpListAndSongsAsync(string bpListUrl)
+	public static async Task<BPList> GetWebBpListAsync(string bpListUrl)
 	{
-		Console.WriteLine("Starting DownloadWebBpListAndSongsAsync");
+		Console.WriteLine("Starting " + nameof(GetWebBpListAsync));
 		Task<BPList> downloadBpListFileTask = DownloadBpListFileAsync(bpListUrl);
 		await downloadBpListFileTask;
 
@@ -21,7 +21,16 @@ public static class BeatSaverDownloadManager
 		
 		// filter bplist
 		
+		Console.WriteLine("Finished " + nameof(GetWebBpListAsync));
 		return downloadBpListFileTask.Result;
+	}
+
+	public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)
+	{
+		Console.WriteLine("Starting " + nameof(GenerateBpListFromSpotifyPlaylistAsync));
+		await Task.Delay(1000);
+		Console.WriteLine("Finished " + nameof(GenerateBpListFromSpotifyPlaylistAsync));
+		return new BPList();
 	}
 
 	private static async Task<BPList> DownloadBpListFileAsync(string bpListUrl)
