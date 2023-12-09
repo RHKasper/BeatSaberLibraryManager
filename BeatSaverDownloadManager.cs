@@ -16,7 +16,6 @@ public static class BeatSaverDownloadManager
 			tasks[i] = GetMapDataAsync(downloadBpListFileTask.Result.songs[i]);
 		}
 
-		Console.WriteLine("Waiting on " + tasks.Length + " tasks");
 		Task.WaitAll(tasks);
 		
 		// filter bplist
