@@ -14,6 +14,13 @@ public class Program
 
 		//Enqueue initial tasks
 		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
+		queuedTasks.Enqueue(new BeatSaverMapDownloadTask("75879e3d3bdb21d6997c93b7fc4937cfb70546ab"));
 
 		while (queuedTasks.Any() || runningTasks.Any())
 		{
@@ -23,11 +30,19 @@ public class Program
 
 				task.OnFinished += OnTaskFinished;
 				runningTasks.Add(task);
-				task.Execute();
+				ThreadPool.QueueUserWorkItem(_ => task.Execute());
 			}
 			
 			Console.WriteLine("Waiting on " + queuedTasks.Count + " queued tasks and " + runningTasks.Count + " running tasks");
 			Thread.Sleep(150);
+		}
+	}
+
+	public static void EnqueueBpListDownloadTasks(Queue<MyTask> taskQueue)
+	{
+		foreach (string url in Playlists.BpListUrls.Values)
+		{
+			
 		}
 	}
 }
