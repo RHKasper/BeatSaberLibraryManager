@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using BeatSaberLibraryManager.Inputs;
+using BeatSaberLibraryManager.WebDownload;
 
 namespace BeatSaberLibraryManager;
 
@@ -10,7 +11,7 @@ public class Program
 		Stopwatch stopwatch = Stopwatch.StartNew();
 		List<Task<BPList>> tasks = new List<Task<BPList>>(Playlists.BpListUrls.Count + Playlists.SpotifyPlaylistUrls.Count);
 		
-		tasks.Add(BeatSaverDownloadManager.GetWebBpListAsync(Playlists.BpListUrls.Values.First()));
+		tasks.Add(HighLevelTasks.GetWebBpListAsync(Playlists.BpListUrls.Values.First()));
 		// foreach (string webBpListUrl in Playlists.BpListUrls.Values)
 		// {
 		// 	Task<BPList> t = BeatSaverDownloadManager.GetWebBpListAsync(webBpListUrl);

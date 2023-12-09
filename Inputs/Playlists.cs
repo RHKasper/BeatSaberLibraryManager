@@ -4,6 +4,12 @@ public class Playlists
 {
 	public static readonly Dictionary<string, string> BpListUrls = new()
 	{
+		// BeatSaver Mapper Playlists
+		{"Teuflum", GetBeatSaverMapperPlaylistUrl(68740)},
+		{"TheCzar1994", GetBeatSaverMapperPlaylistUrl(4285984)},
+		{"NixieKorten - Electroswing mapper ", GetBeatSaverMapperPlaylistUrl(4286374)},
+		{"Revelate", GetBeatSaverMapperPlaylistUrl(2768)},
+		
 		// BeastSaber Playlists
 		{ "Alphabeat PixelTerror", "https://bsaber.com/PlaylistAPI/21-07-01_pixel-terror-pack_alphabeat.bplist" },
 		
@@ -15,12 +21,6 @@ public class Playlists
 		{ "Linkin Park", GetBeatSaverPlaylistUrl(12144) },
 		{ "KDA", GetBeatSaverPlaylistUrl(70553) },
 		{ "BTS", GetBeatSaverPlaylistUrl(70543) },
-		
-		// BeatSaver Mapper Playlists
-		{"Teuflum", GetBeatSaverMapperPlaylistUrl(68740)},
-		{"TheCzar1994", GetBeatSaverMapperPlaylistUrl(4285984)},
-		{"NixieKorten - Electroswing mapper ", GetBeatSaverMapperPlaylistUrl(4286374)},
-		{"Revelate", GetBeatSaverMapperPlaylistUrl(2768)},
 	};
         
 	public static readonly Dictionary<string,string> SpotifyPlaylistUrls = new()
