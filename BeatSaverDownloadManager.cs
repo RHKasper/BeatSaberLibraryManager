@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using BeatSaberLibraryManager.Utils;
+using Newtonsoft.Json;
 
 namespace BeatSaberLibraryManager;
 
@@ -9,6 +11,7 @@ public static class BeatSaverDownloadManager
 		Console.WriteLine("Starting " + nameof(GetWebBpListAsync));
 		Task<BPList> downloadBpListFileTask = DownloadBpListFileAsync(bpListUrl);
 		await downloadBpListFileTask;
+		Console.WriteLine("Downloaded BPList: " + downloadBpListFileTask.Result.playlistTitle);
 
 		Task<MapData>[] tasks = new Task<MapData>[downloadBpListFileTask.Result.songs.Count];
 		for (int i = 0; i < downloadBpListFileTask.Result.songs.Count; i++)
@@ -34,12 +37,10 @@ public static class BeatSaverDownloadManager
 
 	private static async Task<BPList> DownloadBpListFileAsync(string bpListUrl)
 	{
-		await Task.Delay(250);
+		Task<string> downloadTask = DownloadUtil.Get(bpListUrl);
+		await downloadTask;
 		Console.WriteLine("BP List file downloaded");
-		return new BPList
-		{
-			songs = new List<SongInfo>{new(), new(), new()}
-		};
+		return JsonConvert.DeserializeObject<BPList>(downloadTask.Result) ?? throw new InvalidOperationException();
 	}
 
 	private static async Task<MapData> GetMapDataAsync(SongInfo songInfo)

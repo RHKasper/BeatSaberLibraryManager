@@ -6,22 +6,8 @@ namespace BeatSaberLibraryManager.Utils
 {
     public static class DownloadUtil
     {
-        public const float DownloadTimeOutDuration = 5;
-
-        public static BPList GetBpList(string url, out string fileContents)
-        {
-            try
-            {
-                fileContents = Get(url);
-                return JsonConvert.DeserializeObject<BPList>(fileContents);
-            }
-            catch (TimeoutException)
-            {
-                fileContents = default;
-                return null;
-            }
-        }
-
+        public const float DownloadTimeOutDuration = 15;
+        
         /// <summary>
         /// download a zip file from <see cref="uri"/> to <see cref="outFilePath"/>.
         /// </summary>
@@ -56,11 +42,12 @@ namespace BeatSaberLibraryManager.Utils
         }
         
         /// <exception cref="TimeoutException"></exception>
-        public static string Get(string uri)
+        public static async Task<string> Get(string uri)
         {
+            //todo: resolve usage of deprecated WebClient class
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-
+            
             WebClient webClient = new WebClient();
             webClient.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
             webClient.Headers.Add("User-Agent: Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)");
@@ -75,12 +62,13 @@ namespace BeatSaberLibraryManager.Utils
             };
 
             TimeSpan duration = TimeSpan.FromSeconds(DownloadTimeOutDuration);
-            while (result == default && stopwatch.Elapsed < duration) 
-                Thread.Sleep(100);
+            while (result == default && stopwatch.Elapsed < duration)
+                await Task.Delay(100);
 
             if (result == default && stopwatch.Elapsed >= duration)
                 throw new TimeoutException($"Web Request for {uri} took more than {DownloadTimeOutDuration} second to complete");
-            
+
+            Debug.Assert(result != null, nameof(result) + " != null");
             return result;
         }
 

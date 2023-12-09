@@ -10,17 +10,18 @@ public class Program
 		Stopwatch stopwatch = Stopwatch.StartNew();
 		List<Task<BPList>> tasks = new List<Task<BPList>>(Playlists.BpListUrls.Count + Playlists.SpotifyPlaylistUrls.Count);
 		
-		foreach (string webBpListUrl in Playlists.BpListUrls.Values)
-		{
-			Task<BPList> t = BeatSaverDownloadManager.GetWebBpListAsync(webBpListUrl);
-			tasks.Add(t);
-		}
-
-		foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
-		{
-			Task<BPList> t = BeatSaverDownloadManager.GenerateBpListFromSpotifyPlaylistAsync(spotifyPlaylistUrl);
-			tasks.Add(t);
-		}
+		tasks.Add(BeatSaverDownloadManager.GetWebBpListAsync(Playlists.BpListUrls.Values.First()));
+		// foreach (string webBpListUrl in Playlists.BpListUrls.Values)
+		// {
+		// 	Task<BPList> t = BeatSaverDownloadManager.GetWebBpListAsync(webBpListUrl);
+		// 	tasks.Add(t);
+		// }
+		//
+		// foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
+		// {
+		// 	Task<BPList> t = BeatSaverDownloadManager.GenerateBpListFromSpotifyPlaylistAsync(spotifyPlaylistUrl);
+		// 	tasks.Add(t);
+		// }
 		
 		Task.WaitAll(tasks.Cast<Task>().ToArray());
 		//todo: export playlists 
