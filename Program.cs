@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using BeatSaberLibraryManager.Inputs;
+using BeatSaberLibraryManager.MapEvaluation;
 using BeatSaberLibraryManager.Outputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
@@ -73,15 +74,16 @@ public class Program
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
-    private static void FilterOutput(List<Beatmap> allBpLists)
+    private static void FilterOutput(List<Beatmap> beatmaps)
     {
-        // foreach (var  in allBpLists)
-        // {
-        //     for (int i = bpList.songs.Count; i >= 0; i--)
-        //     {
-        //         if(bpList.songs[i].)
-        //     }
-        // }
+        for (var i = beatmaps.Count - 1; i >= 0; i--)
+        {
+            if (beatmaps[i].FailsAnyQualityFilter())
+            {
+                Console.WriteLine("Filtering out: " + beatmaps[i].Name + " - " + beatmaps[i].Stats.Score + "; " + beatmaps[i].LatestVersion.Difficulties.Most(d => d.Parity.Errors).Parity.Errors + " parity errors");
+                beatmaps.RemoveAt(i);
+            }
+        }
     }
 
     private static Task<Beatmap?[]> DownloadBeatmaps(IEnumerable<BPList> bpLists, BeatSaver beatSaverApi)

@@ -40,10 +40,10 @@ namespace BeatSaberLibraryManager.MapEvaluation
 				return doc.stats.score < .7f;
 		}
 		
-		public static bool FailsAnyQualityFilter(this OrderedBeatmap map)
+		public static bool FailsAnyQualityFilter(this Beatmap map)
 		{
-			BeatmapVersion v = map.Map.LatestVersion;
-			return map.Map.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
+			BeatmapVersion v = map.LatestVersion;
+			return map.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
 		}
 		
 		public static bool HasTooManyParityErrors(this BeatmapVersion v, int maxParityErrors = 5)
