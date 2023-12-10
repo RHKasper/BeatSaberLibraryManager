@@ -41,7 +41,7 @@ public class Program
 
     private static void FilterDownloadMapsAndExport(List<BPList?> allBpLists, BeatSaver beatSaverApi)
     {
-        foreach (BPList bpList in allBpLists)
+        foreach (BPList? bpList in allBpLists)
         {
             if (bpList != null)
             {
