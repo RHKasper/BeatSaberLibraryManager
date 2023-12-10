@@ -1,4 +1,6 @@
-﻿using BeatSaberLibraryManager.MapEvaluation;
+﻿using System.Diagnostics;
+using BeatSaberLibraryManager.MapEvaluation;
+using BeatSaberLibraryManager.Outputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
@@ -12,7 +14,24 @@ namespace BeatSaberLibraryManager;
 /// </summary>
 public static class HighLevelTasks
 {
-	public static async Task<Playlist?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi, bool filter = true)
+	public static async Task DownloadMapToCache(string hash, BeatSaver beatSaverApi)
+	{
+		Task<Beatmap?> beatmapDownload = beatSaverApi.BeatmapByHash(hash);
+		await beatmapDownload;
+
+		if (beatmapDownload.Result != null)
+		{
+			Task<byte[]?> zipDownload = beatmapDownload.Result.LatestVersion.DownloadZIP();
+			await zipDownload;
+			string fileLocation = FileManager.GetZipFileName(beatmapDownload.Result);
+		}
+		else
+		{
+			Console.WriteLine("Failed to download a map: " + hash);
+		}
+	}
+	
+	public static async Task<PlaylistDetail?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
 	{
 		Task<PlaylistDetail?> playlistDetailDownload = beatSaverApi.Playlist(id);
 		await playlistDetailDownload;
@@ -22,19 +41,7 @@ public static class HighLevelTasks
 			return null;
 		}
 
-		if (filter)
-		{
-			var filteredMapsList = playlistDetailDownload.Result.Beatmaps.Where(map => !map.FailsAnyQualityFilter());
-		}
-		
-		foreach (var beatMap in playlistDetailDownload.Result.Beatmaps)
-		{
-			Console.WriteLine(beatMap.Map.Name + ": " + beatMap.Map.ID);
-		}
-
-
-
-		return playlistDetailDownload.Result.Playlist;
+		return playlistDetailDownload.Result;
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)

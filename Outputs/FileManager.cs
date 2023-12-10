@@ -1,10 +1,11 @@
 ﻿using System.IO.Compression;
+using BeatSaverSharp.Models;
 
 namespace BeatSaberLibraryManager.Outputs
 {
 	public static class FileManager
 	{
-		public const string MapCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
+		public const string MapCachePath = "/Users/robert/Downloads";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
 		public const string ImagesCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
 		
 		public const string MapsOutputFolderPath = "C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
@@ -29,7 +30,7 @@ namespace BeatSaberLibraryManager.Outputs
 		}
 
 
-		public static string GetMapDirectory(MapData mapData) => GetMapDirectory(GetZipFilePath(GetZipFileName(mapData)));
+		public static string GetMapDirectory(Beatmap beatmap) => GetMapDirectory(GetZipFilePath(GetZipFileName(beatmap)));
 
 		public static string GetMapDirectory(string zipFilePath)
 		{
@@ -45,11 +46,11 @@ namespace BeatSaberLibraryManager.Outputs
 			return zipFilePath;
 		}
 		
-		public static string GetZipFilePath(MapData mapData) => GetZipFilePath(GetZipFileName(mapData));
-
-		public static string GetZipFileName(MapData mapData)
+		public static string GetZipFilePath(Beatmap beatmap) => GetZipFilePath(GetZipFileName(beatmap));
+		
+		public static string GetZipFileName(Beatmap beatmap)
 		{
-			string zipFileName = mapData.name + " - " + mapData.id + ".zip";
+			string zipFileName = beatmap.Name + " - " + beatmap.ID + ".zip";
 			foreach (char c in Path.GetInvalidFileNameChars())
 				zipFileName = zipFileName.Replace(c, ' ');
 			return zipFileName;
