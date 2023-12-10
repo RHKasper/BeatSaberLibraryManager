@@ -31,17 +31,17 @@ public static class HighLevelTasks
 		}
 	}
 	
-	public static async Task<PlaylistDetail?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
+	public static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
 	{
 		Task<PlaylistDetail?> playlistDetailDownload = beatSaverApi.Playlist(id);
 		await playlistDetailDownload;
 
 		if (playlistDetailDownload.Result == null)
-		{
 			return null;
-		}
-
-		return playlistDetailDownload.Result;
+		
+		Task<BPList?> playlistDownload = playlistDetailDownload.Result.GetBPList();
+		await playlistDownload;
+		return playlistDownload.Result;
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)

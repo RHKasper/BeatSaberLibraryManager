@@ -1,4 +1,7 @@
-﻿namespace BeatSaberLibraryManager
+﻿using BeatSaverSharp.Models.Pages;
+using Newtonsoft.Json;
+
+namespace BeatSaberLibraryManager
 {
     public static class JSONClassExtensions
     {
@@ -24,6 +27,14 @@
             }
 
             return latest;
+        }
+
+        public static async Task<BPList?> GetBPList(this PlaylistDetail playlistDetail)
+        {
+            Task<byte[]?> playlistDownload = playlistDetail.Playlist.DownloadPlaylist();
+            await playlistDownload;
+
+            return playlistDownload.Result == null ? null : JsonConvert.DeserializeObject<BPList>(System.Text.Encoding.Default.GetString(playlistDownload.Result));
         }
     }
 }
