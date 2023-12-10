@@ -5,7 +5,7 @@ namespace BeatSaberLibraryManager.Outputs
 {
 	public static class FileManager
 	{
-		public const string MapCachePath = "/Users/robert/Downloads";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
+		public const string MapCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
 		public const string ImagesCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
 		
 		public const string MapsOutputFolderPath = "C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
@@ -57,7 +57,7 @@ namespace BeatSaberLibraryManager.Outputs
 		}
 		
 
-		public static void ClearOutputDirectories()
+		public static void PrepareOutputDirectories()
 		{
 			if (Directory.Exists(MapsOutputFolderPath))
 				Directory.Delete(MapsOutputFolderPath, true);
@@ -66,6 +66,13 @@ namespace BeatSaberLibraryManager.Outputs
 			if (Directory.Exists(PlaylistsOutputFolderPath))
 				Directory.Delete(PlaylistsOutputFolderPath, true);
 			Directory.CreateDirectory(PlaylistsOutputFolderPath);
+		}
+		
+		public static void PrepareMapZipCacheDirectory()
+		{
+			if (Directory.Exists(MapCachePath))
+				Directory.Delete(MapCachePath, true);
+			Directory.CreateDirectory(MapCachePath);
 		}
 		
 		

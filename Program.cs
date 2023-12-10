@@ -10,6 +10,8 @@ namespace BeatSaberLibraryManager;
 
 public class Program
 {
+    private const int ZipDownloadTimeoutSeconds = 30;
+    
     public static async Task Main()
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
@@ -18,15 +20,19 @@ public class Program
         List<BPList> allFilteredBpLists = GetAllFilteredBpLists(beatSaverApi).ToList();
         List<BPList> unfilteredBpLists = GetAllUnfilteredBpLists(beatSaverApi).ToList();
         
-        var downloadUnfilteredBeatMaps = DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
+        var downloadUnfilteredBeatmaps = DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
         var downloadFilteredBeatmaps = DownloadBeatmaps(allFilteredBpLists, beatSaverApi);
-        await downloadUnfilteredBeatMaps;
+        await downloadUnfilteredBeatmaps;
         await downloadFilteredBeatmaps;
+        List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmaps.Result.Where(b => b != null).Cast<Beatmap>().ToList();
+        List<Beatmap> filteredBeatmaps = downloadFilteredBeatmaps.Result.Where(b => b != null).Cast<Beatmap>().ToList();
         
-        FilterOutput(downloadFilteredBeatmaps);
+        FilterOutput(filteredBeatmaps);
         
-        await DownloadZipFiles(downloadUnfilteredBeatMaps);
-        await DownloadZipFiles(downloadFilteredBeatmaps);
+        FileManager.PrepareMapZipCacheDirectory();
+        FileManager.PrepareOutputDirectories();
+        
+        await DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
     }
@@ -67,7 +73,7 @@ public class Program
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
-    private static void FilterOutput(Task<Beatmap?[]> allBpLists)
+    private static void FilterOutput(List<Beatmap> allBpLists)
     {
         // foreach (var  in allBpLists)
         // {
@@ -97,15 +103,13 @@ public class Program
         return Task.WhenAll(beatmapDownloadTasks);
     }
 
-    private static async Task DownloadZipFiles(Task<Beatmap?[]> downloadUnfilteredBeatMaps)
+    private static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps)
     {
         List<Task> zipFileDownloadAndUnzipTasks = new();
-        foreach (Beatmap? beatmap in downloadUnfilteredBeatMaps.Result)
+        foreach (Beatmap beatmap in beatmaps)
         {
-            if (beatmap != null)
-            {
-                zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap));
-            }
+            Console.WriteLine("Requesting download for " + beatmap.Name);
+            zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap));
         }
 
         await Task.WhenAll(zipFileDownloadAndUnzipTasks.ToArray());
@@ -114,14 +118,20 @@ public class Program
     private static async Task DownloadAndUnzipZipFile(Beatmap beatmap)
     {
         var downloadZipContents = beatmap.LatestVersion.DownloadZIP();
-        await downloadZipContents;
-        
-        if (downloadZipContents.Result != null)
+        await Task.WhenAny(downloadZipContents, Task.Delay(1000 * ZipDownloadTimeoutSeconds));
+
+        if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
         {
+            Console.WriteLine("Downloaded .zip byte[] for " + beatmap.Name);
+            
             string zipFilePath = FileManager.GetZipFilePath(beatmap);
             await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result);
             FileManager.UnzipFile(zipFilePath, out var mapFolderPath);
             Console.WriteLine("Unzipped map to: " + mapFolderPath);
-        }   
+        }
+        else
+        {
+            Console.WriteLine("Failed to download zip file for " + beatmap.Name);
+        }
     }
 }
