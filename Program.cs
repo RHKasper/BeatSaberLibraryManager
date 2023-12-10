@@ -105,27 +105,41 @@ public class Program
 
     private static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps)
     {
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         List<Task> zipFileDownloadAndUnzipTasks = new();
         foreach (Beatmap beatmap in beatmaps)
         {
             Console.WriteLine("Requesting download for " + beatmap.Name);
-            zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap));
+            zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap, cancellationTokenSource.Token));
         }
 
-        await Task.WhenAll(zipFileDownloadAndUnzipTasks.ToArray());
+        int secondsWaited = 0;
+        while (zipFileDownloadAndUnzipTasks.Any() && secondsWaited < ZipDownloadTimeoutSeconds)
+        {
+            Console.WriteLine("waiting on " + zipFileDownloadAndUnzipTasks.Count(t => !t.IsCompletedSuccessfully) + " zip download tasks");
+            await Task.Delay(1000);
+            secondsWaited += 1;
+        }
+
+        //todo: retry downloads that didn't successfully finish?
+        cancellationTokenSource.Cancel();
     }
 
-    private static async Task DownloadAndUnzipZipFile(Beatmap beatmap)
+    private static async Task DownloadAndUnzipZipFile(Beatmap beatmap, CancellationToken cancellationToken)
     {
-        var downloadZipContents = beatmap.LatestVersion.DownloadZIP();
-        await Task.WhenAny(downloadZipContents, Task.Delay(1000 * ZipDownloadTimeoutSeconds));
+        var downloadZipContents = beatmap.LatestVersion.DownloadZIP(cancellationToken);
+
+        while (cancellationToken.IsCancellationRequested == false && downloadZipContents.IsCompletedSuccessfully == false)
+        {
+            await Task.Delay(250, cancellationToken);
+        }
 
         if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
         {
             Console.WriteLine("Downloaded .zip byte[] for " + beatmap.Name);
             
             string zipFilePath = FileManager.GetZipFilePath(beatmap);
-            await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result);
+            await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result, cancellationToken);
             FileManager.UnzipFile(zipFilePath, out var mapFolderPath);
             Console.WriteLine("Unzipped map to: " + mapFolderPath);
         }
