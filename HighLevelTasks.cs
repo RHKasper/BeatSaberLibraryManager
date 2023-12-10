@@ -1,4 +1,8 @@
-﻿using BeatSaberLibraryManager.WebDownload;
+﻿using BeatSaberLibraryManager.MapEvaluation;
+using BeatSaberLibraryManager.WebDownload;
+using BeatSaverSharp;
+using BeatSaverSharp.Models;
+using BeatSaverSharp.Models.Pages;
 using Newtonsoft.Json;
 
 namespace BeatSaberLibraryManager;
@@ -8,31 +12,29 @@ namespace BeatSaberLibraryManager;
 /// </summary>
 public static class HighLevelTasks
 {
-	public static async Task<BPList> GetWebBpListAsync(string bpListUrl)
+	public static async Task<Playlist?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi, bool filter = true)
 	{
-		Console.WriteLine("Starting " + nameof(GetWebBpListAsync));
-		Task<BPList> downloadBpListFileTask = BeatSaverDownloadManager.DownloadBpListFileAsync(bpListUrl);
-		await downloadBpListFileTask;
-		Console.WriteLine("Downloaded BPList: " + downloadBpListFileTask.Result.playlistTitle);
+		Task<PlaylistDetail?> playlistDetailDownload = beatSaverApi.Playlist(id);
+		await playlistDetailDownload;
 
-		Task<MapData>[] tasks = new Task<MapData>[downloadBpListFileTask.Result.songs.Count];
-		for (int i = 0; i < downloadBpListFileTask.Result.songs.Count; i++)
+		if (playlistDetailDownload.Result == null)
 		{
-			tasks[i] = BeatSaverDownloadManager.GetMapDataAsync(downloadBpListFileTask.Result.songs[i]);
+			return null;
 		}
 
-		Task.WaitAll(tasks);
-		
-		// filter bplist
-		
-		Console.WriteLine("Finished " + nameof(GetWebBpListAsync));
-
-		foreach (Task<MapData> task in tasks)
+		if (filter)
 		{
-			Console.WriteLine("Downloaded map: " + task.Result.name);
+			var filteredMapsList = playlistDetailDownload.Result.Beatmaps.Where(map => !map.FailsAnyQualityFilter());
 		}
 		
-		return downloadBpListFileTask.Result;
+		foreach (var beatMap in playlistDetailDownload.Result.Beatmaps)
+		{
+			Console.WriteLine(beatMap.Map.Name + ": " + beatMap.Map.ID);
+		}
+
+
+
+		return playlistDetailDownload.Result.Playlist;
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)
@@ -43,8 +45,8 @@ public static class HighLevelTasks
 	// 	return new BPList();
 	// }
 
-	
-	
+
+
 	// public static async Task<T[]> FilterAsync<T>(IEnumerable<T> sourceEnumerable, Func<T, Task<bool>> predicateAsync)
 	// {
 	// 	return (await Task.WhenAll(

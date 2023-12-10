@@ -2,6 +2,7 @@
 using BeatSaberLibraryManager.Inputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
+using BeatSaverSharp.Models;
 using BeatSaverSharp.Models.Pages;
 
 namespace BeatSaberLibraryManager;
@@ -10,18 +11,16 @@ public class Program
 {
 	public static Task Main()
 	{
-		
-		
-		
 		Stopwatch stopwatch = Stopwatch.StartNew();
-		List<Task<PlaylistDetail?>> tasks = new(Playlists.BeatSaverPlaylists.Count + Playlists.SpotifyPlaylistUrls.Count);
+		BeatSaver beatSaverApi =  new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
 
-		BeatSaver beatSaver = new BeatSaver(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
+		List<Task<Playlist?>> tasks = new(Playlists.BeatSaverPlaylists.Count + Playlists.SpotifyPlaylistUrls.Count);
+		
 		
 		 foreach (int id in Playlists.BeatSaverPlaylists.Values)
 		 {
-		 	Task<PlaylistDetail?> t = beatSaver.Playlist(id);
-		 	tasks.Add(t);
+			 Task<Playlist?> t = HighLevelTasks.GetBeatSaverPlaylist(id, beatSaverApi);
+			 tasks.Add(t);
 		 }
 		 
 		 // foreach (int id in Playlists.BeatSaverMapperPlaylists.Values)
@@ -38,12 +37,9 @@ public class Program
 		
 		Task.WaitAll(tasks.Cast<Task>().ToArray());
 
-		foreach (Task<PlaylistDetail?> task in tasks)
+		foreach (Task<Playlist> task in tasks)
 		{
-			if (task.Result != null)
-			{
-				Console.WriteLine(task.Result.Playlist.Name);
-			}
+			Console.WriteLine(task.Result.Name);
 		}
 		
 		//todo: export playlists 

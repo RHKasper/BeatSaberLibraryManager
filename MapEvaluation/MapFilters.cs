@@ -1,39 +1,44 @@
-﻿using SpotifyAPI.Web;
+﻿using BeatSaverSharp.Models;
+using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.MapEvaluation
 {
 	public static class MapFilters
 	{
-		public static bool FailsAnyQualityFilter(this Doc d)
+		public static bool FailsAnyQualityFilter(this OrderedBeatmap map)
 		{
-			Version v = d.GetLatestVersion();
-			return d.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
+			BeatmapVersion v = map.Map.LatestVersion;
+			return map.Map.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
 		}
 		
-		public static bool HasTooManyParityErrors(this Version v, int maxParityErrors = 5)
+		public static bool HasTooManyParityErrors(this BeatmapVersion v, int maxParityErrors = 5)
 		{
-			foreach (Diff diff in v.diffs)
+			foreach (BeatmapDifficulty diff in v.Difficulties)
 			{
-				if(diff.difficulty != Diff.Normal && diff.difficulty != Diff.Easy)
-					if (diff.paritySummary.errors > maxParityErrors)
+				if(diff.Difficulty != BeatmapDifficulty.BeatSaverBeatmapDifficulty.Normal && diff.Difficulty != BeatmapDifficulty.BeatSaverBeatmapDifficulty.Easy)
+				{
+					if (diff.Parity.Errors > maxParityErrors)
+					{
 						return true;
+					}
+				}
 			}
 			return false;
 		}
 
-		public static bool NpsIsTooHigh(this Version version, float maxNps = 6.5f)
+		public static bool NpsIsTooHigh(this BeatmapVersion version, float maxNps = 6.5f)
 		{
-			return version.diffs.All(d => d.nps > maxNps);
+			return version.Difficulties.All(d => d.NPS > maxNps);
 		}
 
-		public static bool IsPoorlyRated(this Doc doc)
+		public static bool IsPoorlyRated(this Beatmap beatmap)
 		{
-			bool hasManyRatings = doc.stats.upvotes + doc.stats.downvotes > 50;
+			bool hasManyRatings = beatmap.Stats.Upvotes + beatmap.Stats.Downvotes > 50;
 
 			if (hasManyRatings)
-				return doc.stats.score < .8f;
+				return beatmap.Stats.Score < .8f;
 			else
-				return doc.stats.score < .7f;
+				return beatmap.Stats.Score < .7f;
 		}
 
 		public static bool HasAnyOfRequestedDifficulties(this Version v, string[] desiredDiffs) => v.diffs.Any(d => desiredDiffs.Any(desired => d.difficulty == desired));
