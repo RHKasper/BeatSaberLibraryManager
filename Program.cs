@@ -11,7 +11,7 @@ namespace BeatSaberLibraryManager;
 
 public class Program
 {
-    private const int ZipDownloadTimeoutSeconds = 30;
+    private const int ZipDownloadTimeoutSeconds = 20;
     
     public static async Task Main()
     {
@@ -41,6 +41,7 @@ public class Program
     private static IEnumerable<BPList> GetAllFilteredBpLists(BeatSaver beatSaverApi)
     {
         List<Task<BPList?>> tasks = new();
+        tasks.Add(HighLevelTasks.GetWebBpList(Playlists.BeastSaberPlaylists.Values.First()));
 
         //Download all beatsaver playlists
         foreach (int id in Playlists.FilteredBeatSaverPlaylists.Values)
@@ -49,8 +50,13 @@ public class Program
             tasks.Add(t);
         }
         
-        // todo: Download all beatsaver user playlists
-        // todo: Download all non-beatsaver playlists
+        //Download all non-beatsaver BPLists
+        var webPlaylistUrls = Playlists.BeatSaverMapperPlaylists.Values.Concat(Playlists.BeastSaberPlaylists.Values);
+        foreach (string url in webPlaylistUrls)
+        {
+            Task<BPList?> t = HighLevelTasks.GetWebBpList(url);
+            tasks.Add(t);
+        }
 
         Task.WaitAll(tasks.Cast<Task>().ToArray());
 
@@ -97,7 +103,7 @@ public class Program
 
             foreach (SongInfo songInfo in bpList.songs)
             {
-                Console.WriteLine(songInfo.songName);
+                Console.WriteLine(songInfo.songName + " - " + songInfo.hash);
                 beatmapDownloadTasks.Add(beatSaverApi.BeatmapByHash(songInfo.hash));
             }
         }

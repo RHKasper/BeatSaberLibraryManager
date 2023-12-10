@@ -9,7 +9,7 @@ namespace BeatSaberLibraryManager.WebDownload
         public const float DownloadTimeOutDuration = 15;
         
         /// <exception cref="TimeoutException"></exception>
-        public static async Task<string> Get(string uri)
+        public static async Task<string?> Get(string uri)
         {
             //todo: resolve usage of deprecated WebClient class
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
@@ -35,7 +35,6 @@ namespace BeatSaberLibraryManager.WebDownload
             if (result == default && stopwatch.Elapsed >= duration)
                 throw new TimeoutException($"Web Request for {uri} took more than {DownloadTimeOutDuration} second to complete");
 
-            Debug.Assert(result != null, nameof(result) + " != null");
             return result;
         }
 

@@ -31,7 +31,7 @@ public static class HighLevelTasks
 		}
 	}
 	
-	public static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi, bool shouldBeFiltered = true)
+	public static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
 	{
 		Task<PlaylistDetail?> playlistDetailDownload = beatSaverApi.Playlist(id);
 		await playlistDetailDownload;
@@ -42,6 +42,13 @@ public static class HighLevelTasks
 		Task<BPList?> playlistDownload = playlistDetailDownload.Result.GetBPList();
 		await playlistDownload;
 		return playlistDownload.Result;
+	}
+	
+	public static async Task<BPList?> GetWebBpList(string url)
+	{
+		Task<string?> bpListStringDownload = DownloadUtil.Get(url);
+		await bpListStringDownload;
+		return bpListStringDownload.Result == null ? null : JsonConvert.DeserializeObject<BPList>(bpListStringDownload.Result);
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)
