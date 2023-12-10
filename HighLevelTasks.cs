@@ -31,7 +31,7 @@ public static class HighLevelTasks
 		}
 	}
 	
-	public static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
+	public static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi, bool shouldBeFiltered = true)
 	{
 		Task<PlaylistDetail?> playlistDetailDownload = beatSaverApi.Playlist(id);
 		await playlistDetailDownload;

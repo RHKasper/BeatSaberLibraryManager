@@ -3,8 +3,43 @@ using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.MapEvaluation
 {
+	/// <summary>
+	/// todo: cleanup the duplicate methods here
+	/// </summary>
 	public static class MapFilters
 	{
+		public static bool FailsAnyQualityFilter(this Doc d)
+		{
+			Version v = d.GetLatestVersion();
+			return d.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
+		}
+		
+		public static bool HasTooManyParityErrors(this Version v, int maxParityErrors = 5)
+		{
+			foreach (Diff diff in v.diffs)
+			{
+				if(diff.difficulty != Diff.Normal && diff.difficulty != Diff.Easy)
+					if (diff.paritySummary.errors > maxParityErrors)
+						return true;
+			}
+			return false;
+		}
+
+		public static bool NpsIsTooHigh(this Version version, float maxNps = 6.5f)
+		{
+			return version.diffs.All(d => d.nps > maxNps);
+		}
+
+		public static bool IsPoorlyRated(this Doc doc)
+		{
+			bool hasManyRatings = doc.stats.upvotes + doc.stats.downvotes > 50;
+
+			if (hasManyRatings)
+				return doc.stats.score < .8f;
+			else
+				return doc.stats.score < .7f;
+		}
+		
 		public static bool FailsAnyQualityFilter(this OrderedBeatmap map)
 		{
 			BeatmapVersion v = map.Map.LatestVersion;

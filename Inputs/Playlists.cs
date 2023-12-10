@@ -2,6 +2,12 @@
 
 public class Playlists
 {
+	public static readonly Dictionary<string, int> UnfilteredBeatSaverPlaylists = new()
+	{
+		{ "Favorites", 7903 },
+		{ "Aspirational", 7038 },
+	};
+
 	public static readonly Dictionary<string, int> BeatSaverMapperPlaylists = new()
 	{
 		{ "Teuflum", 68740 },
@@ -10,10 +16,8 @@ public class Playlists
 		{ "Revelate", 2768 },
 	};
 
-	public static readonly Dictionary<string, int> BeatSaverPlaylists = new()
+	public static readonly Dictionary<string, int> FilteredBeatSaverPlaylists = new()
 	{
-		{ "Favorites", 7903 },
-		{ "Aspirational", 7038 },
 		{ "Ajr NeoTheater", 171573 },
 		{ "Skillet", 85217 },
 		{ "Linkin Park", 12144 },
@@ -34,10 +38,4 @@ public class Playlists
 		{ "Robert's Rock Mix", "https://open.spotify.com/playlist/43jMBPZVR5cdD7Cw1gZF8j?si=9a990d1647eb4cde" },
 		{ "All Likes", "https://open.spotify.com/playlist/5Zi1NzMK91ImLODGEWHNqS?si=bcde847d6766403f" },
 	};
-
-	private static string GetBeatSaverPlaylistUrl(int playlistId) =>
-		"https://api.beatsaver.com/playlists/id/" + playlistId + "/download";
-
-	private static string GetBeatSaverMapperPlaylistUrl(int mapperId) =>
-		"https://api.beatsaver.com/users/id/" + mapperId + "/playlist";
 }
