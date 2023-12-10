@@ -34,7 +34,7 @@ namespace BeatSaberLibraryManager.Outputs
 
 		public static string GetMapDirectory(string zipFilePath)
 		{
-			string targetDir = Path.Combine(MapCachePath, Path.GetFileNameWithoutExtension(zipFilePath));
+			string targetDir = Path.Combine(MapsOutputFolderPath, Path.GetFileNameWithoutExtension(zipFilePath));
 			return targetDir;
 		}
 
