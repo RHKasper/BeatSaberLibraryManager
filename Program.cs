@@ -181,12 +181,7 @@ public class Program
     private static async Task DownloadAndUnzipZipFile(Beatmap beatmap)
     {
         var downloadZipContents = beatmap.LatestVersion.DownloadZIP();
-
-        // todo: await downloadZipContents?
-        while (downloadZipContents.IsCompletedSuccessfully == false)
-        {
-            await Task.Delay(250);
-        }
+        await downloadZipContents;
 
         if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
         {
