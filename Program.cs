@@ -11,7 +11,7 @@ namespace BeatSaberLibraryManager;
 
 public class Program
 {
-    private const int ZipDownloadTimeoutSeconds = 20;
+    private const int ZipDownloadTimeoutSeconds = 25;
     
     public static async Task Main()
     {
@@ -71,10 +71,6 @@ public class Program
         // }
 
         await tasks.AwaitAll();
-        
-        //Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
-        //Debug.Assert(tasks.TrueForAll(t => t.Result != null));
-        
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
@@ -91,10 +87,6 @@ public class Program
         // todo: Generate spotify playlists
 
         await tasks.AwaitAll();
-        
-        // Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
-        // Debug.Assert(tasks.TrueForAll(t => t.Result != null));
-        
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
