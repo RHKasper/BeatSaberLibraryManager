@@ -19,7 +19,7 @@ public class Program
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
 
         // download BPLists and wait for them to finish
-        var getAllFilteredBpLists = GetFilteredBpLists(beatSaverApi);
+        var getAllFilteredBpLists = GetFilteredBeatSaverBpLists(beatSaverApi);
         var getAllUnfilteredBpLists = GetUnfilteredBpLists(beatSaverApi);
         await getAllFilteredBpLists;
         await getAllUnfilteredBpLists;
@@ -52,26 +52,33 @@ public class Program
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
     }
 
-    private static async Task<IEnumerable<BPList>> GetFilteredBpLists(BeatSaver beatSaverApi)
+    private static async Task<IEnumerable<BPList>> GetFilteredBeatSaverBpLists(BeatSaver beatSaverApi)
     {
-        List<Task<BPList?>> tasks = new();
+        List<BPList> bpLists = new List<BPList>();
 
         //Download all beatsaver playlists
         foreach (int id in Playlists.FilteredBeatSaverPlaylists.Values)
         {
-            Task<BPList?> t = HighLevelTasks.GetBeatSaverPlaylist(id, beatSaverApi);
-            tasks.Add(t);
+            BPList? bpList = await HighLevelTasks.GetBeatSaverPlaylist(id, beatSaverApi);
+            if (bpList != null)
+            {
+                bpLists.Add(bpList);
+                Console.WriteLine("Downloaded playlist: " + bpList.playlistTitle);
+            }
         }
         
-        // //Download all beatsaver mapper playlists
-        // foreach (int id in Playlists.BeatSaverMapperPlaylists.Values)
-        // {
-        //     Task<BPList?> t = HighLevelTasks.GetBeatSaverMapperPlaylist(id, beatSaverApi);
-        //     tasks.Add(t);
-        // }
+        //Download all beatsaver mapper playlists
+        foreach (string url in Playlists.BeatSaverMapperPlaylists.Values)
+        {
+            BPList? bpList = await HighLevelTasks.GetBeatSaverMapperPlaylist(url);
+            if (bpList != null)
+            {
+                bpLists.Add(bpList);
+                Console.WriteLine("Downloaded playlist: " + bpList.playlistTitle);
+            }
+        }
 
-        await tasks.AwaitAll();
-        return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
+        return bpLists;
     }
 
     private static async Task<IEnumerable<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi)

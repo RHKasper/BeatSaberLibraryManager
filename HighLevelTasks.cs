@@ -37,40 +37,10 @@ public static class HighLevelTasks
 		return playlistDownload.Result;
 	}
 	
-	// todo: figure out how paging is supposed to work :(
-	public static async Task<BPList?> GetBeatSaverMapperPlaylist(int userId, BeatSaver beatSaverApi)
+	public static async Task<BPList?> GetBeatSaverMapperPlaylist(string url)
 	{
-		Task<User?> userDownload = beatSaverApi.User(userId);
-		await userDownload;
-
-		if (userDownload.Result == null)
-		{
-			Console.WriteLine("ERROR: Failed to download info for user id: " + userId);
-			return null;
-		}
-
-		List<Beatmap> maps = new List<Beatmap>();
-		Task<Page?> beatmapsDownload = userDownload.Result.Beatmaps();
-		await beatmapsDownload;
-
-		while (!beatmapsDownload.Result.Empty)
-		{
-			maps.AddRange(beatmapsDownload.Result.Beatmaps);
-			beatmapsDownload = beatmapsDownload.Result.Next();
-			await beatmapsDownload;
-		}
-
-		return new BPList
-		{
-			playlistTitle = "Maps by " + userDownload.Result.Name,
-			playlistAuthor = userDownload.Result.Name,
-			songs = maps.Select(m => new SongInfo
-			{
-				songName = m.Name,
-				hash = m.LatestVersion.Hash,
-				key = m.LatestVersion.Key,
-			}).ToList(),
-		};
+		string? message = await DownloadUtil.Get(url);
+		return message != null ? JsonConvert.DeserializeObject<BPList>(message) : null;
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)

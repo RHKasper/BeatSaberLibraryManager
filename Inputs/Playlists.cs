@@ -18,12 +18,13 @@ public class Playlists
 		{ "Alphabeat", 8441 }
 	};
 
-	public static readonly Dictionary<string, int> BeatSaverMapperPlaylists = new()
+	public static readonly Dictionary<string, string> BeatSaverMapperPlaylists = new()
 	{
-		{ "Teuflum", 68740 },
-		{ "TheCzar1994", 4285984 },
-		{ "NixieKorten - Electroswing mapper ", 4286374 },
-		{ "Revelate", 2768 },
+		{ "Joetastic", "https://api.beatsaver.com/users/id/58338/playlist/beatsaver-user-58338.bplist"},
+		{ "Teuflum", "https://api.beatsaver.com/users/id/68740/playlist/beatsaver-user-68740.bplist" },
+		{ "TheCzar1994", "https://api.beatsaver.com/users/id/4285984/playlist/beatsaver-user-4285984.bplist" },
+		{ "NixieKorten - Electroswing mapper ", "https://api.beatsaver.com/users/id/4286374/playlist/beatsaver-user-4286374.bplist" },
+		{ "Revelate", "https://api.beatsaver.com/users/id/2768/playlist/beatsaver-user-2768.bplist" },
 	};
 
 	public static readonly Dictionary<string, string> SpotifyPlaylistUrls = new()
