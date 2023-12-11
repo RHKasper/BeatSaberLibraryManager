@@ -210,7 +210,7 @@ public class Testplay
     public DateTime createdAt { get; set; }
     public string feedback { get; set; }
     public DateTime feedbackAt { get; set; }
-    public User user { get; set; }
+    public BSUser user { get; set; }
     public string video { get; set; }
 }
 
@@ -230,7 +230,7 @@ public class Uploader
     public bool verifiedMapper { get; set; }
 }
 
-public class User
+public class BSUser
 {
     public string avatar { get; set; }
     public bool curator { get; set; }

@@ -17,12 +17,14 @@ public class Program
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
+
+        var getAllFilteredBpLists = GetFilteredBpLists(beatSaverApi);
+        var getAllUnfilteredBpLists = GetUnfilteredBpLists(beatSaverApi);
+        await getAllFilteredBpLists;
+        await getAllUnfilteredBpLists;
         
-        List<BPList> allFilteredBpLists = GetAllFilteredBpLists(beatSaverApi).ToList();
-        List<BPList> unfilteredBpLists = GetAllUnfilteredBpLists(beatSaverApi).ToList();
-        
-        var downloadUnfilteredBeatmaps = DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
-        var downloadFilteredBeatmaps = DownloadBeatmaps(allFilteredBpLists, beatSaverApi);
+        var downloadUnfilteredBeatmaps = DownloadBeatmaps(getAllUnfilteredBpLists.Result, beatSaverApi);
+        var downloadFilteredBeatmaps = DownloadBeatmaps(getAllFilteredBpLists.Result, beatSaverApi);
         await downloadUnfilteredBeatmaps;
         await downloadFilteredBeatmaps;
         List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmaps.Result.Where(b => b != null).Cast<Beatmap>().ToList();
@@ -38,10 +40,9 @@ public class Program
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
     }
 
-    private static IEnumerable<BPList> GetAllFilteredBpLists(BeatSaver beatSaverApi)
+    private static async Task<IEnumerable<BPList>> GetFilteredBpLists(BeatSaver beatSaverApi)
     {
         List<Task<BPList?>> tasks = new();
-        tasks.Add(HighLevelTasks.GetWebBpList(Playlists.BeastSaberPlaylists.Values.First()));
 
         //Download all beatsaver playlists
         foreach (int id in Playlists.FilteredBeatSaverPlaylists.Values)
@@ -50,20 +51,33 @@ public class Program
             tasks.Add(t);
         }
         
+        // //Download all beatsaver mapper playlists
+        // foreach (int id in Playlists.BeatSaverMapperPlaylists.Values)
+        // {
+        //     Task<BPList?> t = HighLevelTasks.GetBeatSaverMapperPlaylist(id, beatSaverApi);
+        //     tasks.Add(t);
+        // }
+        
         //Download all non-beatsaver BPLists
-        var webPlaylistUrls = Playlists.BeatSaverMapperPlaylists.Values.Concat(Playlists.BeastSaberPlaylists.Values);
+        var webPlaylistUrls = Playlists.BeastSaberPlaylists.Values;
         foreach (string url in webPlaylistUrls)
         {
             Task<BPList?> t = HighLevelTasks.GetWebBpList(url);
             tasks.Add(t);
         }
 
-        Task.WaitAll(tasks.Cast<Task>().ToArray());
+        foreach (Task<BPList> task in tasks)
+        {
+            await task;
+        }
 
+        Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
+        Debug.Assert(tasks.TrueForAll(t => t.Result != null));
+        
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
-    private static IEnumerable<BPList> GetAllUnfilteredBpLists(BeatSaver beatSaverApi)
+    private static async Task<IEnumerable<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi)
     {
         List<Task<BPList?>> tasks = new();
         
@@ -75,8 +89,12 @@ public class Program
         
         // todo: Generate spotify playlists
 
-        Task.WaitAll(tasks.Cast<Task>().ToArray());
-
+        await Task.WhenAll(tasks.Cast<Task>().ToArray());
+        await Task.Delay(5000);
+        
+        Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
+        Debug.Assert(tasks.TrueForAll(t => t.Result != null));
+        
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
 
@@ -121,6 +139,8 @@ public class Program
             zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap, cancellationTokenSource.Token));
         }
 
+        Console.WriteLine("Requested " + beatmaps.Count + " map zip files");
+        
         int secondsWaited = 0;
         while (zipFileDownloadAndUnzipTasks.Any() && secondsWaited < ZipDownloadTimeoutSeconds)
         {
