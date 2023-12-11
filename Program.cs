@@ -123,12 +123,11 @@ public class Program
 
     private static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps)
     {
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         Dictionary<Task, Beatmap> zipFileDownloadAndUnzipTasks = new();
         foreach (Beatmap beatmap in beatmaps)
         {
             Console.WriteLine("Requesting download for " + beatmap.Name);
-            zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap, cancellationTokenSource.Token), beatmap);
+            zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap), beatmap);
         }
 
         Console.WriteLine("Requested " + beatmaps.Count + " map zip files");
@@ -172,20 +171,21 @@ public class Program
                     foreach (Beatmap beatmap in beatmapsToRetry)
                     {
                         Console.WriteLine("Retrying (#" + retryCount + ") download for " + beatmap.Name);
-                        zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap, cancellationTokenSource.Token), beatmap);
+                        zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap), beatmap);
                     }
                 }
             }
         }
     }
 
-    private static async Task DownloadAndUnzipZipFile(Beatmap beatmap, CancellationToken cancellationToken)
+    private static async Task DownloadAndUnzipZipFile(Beatmap beatmap)
     {
-        var downloadZipContents = beatmap.LatestVersion.DownloadZIP(cancellationToken);
+        var downloadZipContents = beatmap.LatestVersion.DownloadZIP();
 
-        while (cancellationToken.IsCancellationRequested == false && downloadZipContents.IsCompletedSuccessfully == false)
+        // todo: await downloadZipContents?
+        while (downloadZipContents.IsCompletedSuccessfully == false)
         {
-            await Task.Delay(250, cancellationToken);
+            await Task.Delay(250);
         }
 
         if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
@@ -193,7 +193,7 @@ public class Program
             Console.WriteLine("Downloaded .zip byte[] for " + beatmap.Name);
             
             string zipFilePath = FileManager.GetZipFilePath(beatmap);
-            await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result, cancellationToken);
+            await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result);
             FileManager.UnzipFile(zipFilePath, out var mapFolderPath);
             Console.WriteLine("Unzipped map to: " + mapFolderPath);
         }
