@@ -34,7 +34,24 @@ namespace BeatSaberLibraryManager
             Task<byte[]?> playlistDownload = playlistDetail.Playlist.DownloadPlaylist();
             await playlistDownload;
 
-            return playlistDownload.Result == null ? null : JsonConvert.DeserializeObject<BPList>(System.Text.Encoding.Default.GetString(playlistDownload.Result));
+            int retryCount = 0;
+            while (playlistDownload.Result == null)
+            {
+                if (retryCount < 5)
+                {
+                    retryCount++;
+                    Console.WriteLine("ERROR: Failed to get byte[] for beatsaber playlist: " + playlistDetail.Playlist.Name + ". Retry #" + retryCount);
+                    playlistDownload = playlistDetail.Playlist.DownloadPlaylist();
+                    await playlistDownload;
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Failed to get byte[] for beatsaber playlist: " + playlistDetail.Playlist.Name + ". Retry limit exceeded");
+                    break;
+                }
+            }
+
+            return JsonConvert.DeserializeObject<BPList>(System.Text.Encoding.Default.GetString(playlistDownload.Result));
         }
     }
 }

@@ -7,7 +7,7 @@ public class Playlists
 		{ "Favorites", 7903 },
 		{ "Aspirational", 7038 },
 	};
-	
+
 	public static readonly Dictionary<string, int> FilteredBeatSaverPlaylists = new()
 	{
 		{ "Ajr NeoTheater", 171573 },
@@ -15,6 +15,7 @@ public class Playlists
 		{ "Linkin Park", 12144 },
 		{ "KDA", 70553 },
 		{ "BTS", 70543 },
+		{ "Alphabeat", 8441 }
 	};
 
 	public static readonly Dictionary<string, int> BeatSaverMapperPlaylists = new()
@@ -23,11 +24,6 @@ public class Playlists
 		{ "TheCzar1994", 4285984 },
 		{ "NixieKorten - Electroswing mapper ", 4286374 },
 		{ "Revelate", 2768 },
-	};
-
-	public static readonly Dictionary<string, string> BeastSaberPlaylists = new()
-	{
-		{ "Alphabeat PixelTerror", "https://bsaber.com/PlaylistAPI/21-07-01_pixel-terror-pack_alphabeat.bplist" },
 	};
 
 	public static readonly Dictionary<string, string> SpotifyPlaylistUrls = new()

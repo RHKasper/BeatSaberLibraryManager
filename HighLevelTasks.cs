@@ -27,6 +27,13 @@ public static class HighLevelTasks
 
 		Task<BPList?> playlistDownload = playlistDetailDownload.Result.GetBPList();
 		await playlistDownload;
+		
+		if (playlistDownload.Result == null)
+		{
+			Console.WriteLine("ERROR: Failed to download beatsaber playlist id: " + id + " -- " + playlistDownload.Exception);
+			return null;
+		}
+		
 		return playlistDownload.Result;
 	}
 	
@@ -64,19 +71,6 @@ public static class HighLevelTasks
 				key = m.LatestVersion.Key,
 			}).ToList(),
 		};
-	}
-	
-	public static async Task<BPList?> GetWebBpList(string url)
-	{
-		Task<string?> bpListStringDownload = DownloadUtil.Get(url);
-		await bpListStringDownload;
-		if (bpListStringDownload.Result == null)
-		{
-			Console.WriteLine("ERROR: Failed to download playlist at " + url);
-			return null;
-		}
-
-		return JsonConvert.DeserializeObject<BPList>(bpListStringDownload.Result);
 	}
 
 	// public static async Task<BPList> GenerateBpListFromSpotifyPlaylistAsync(string spotifyPlaylistUrl)

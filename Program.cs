@@ -24,6 +24,11 @@ public class Program
         await getAllFilteredBpLists;
         await getAllUnfilteredBpLists;
 
+        foreach (BPList bpList in getAllFilteredBpLists.Result.Concat(getAllUnfilteredBpLists.Result))
+        {
+            Console.WriteLine(bpList.playlistTitle);
+        }
+
         // start downloading Beatmaps (map info)
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = DownloadBeatmaps(getAllFilteredBpLists.Result, beatSaverApi);
         List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = DownloadBeatmaps(getAllUnfilteredBpLists.Result, beatSaverApi);
@@ -64,19 +69,11 @@ public class Program
         //     Task<BPList?> t = HighLevelTasks.GetBeatSaverMapperPlaylist(id, beatSaverApi);
         //     tasks.Add(t);
         // }
-        
-        //Download all non-beatsaver BPLists
-        var webPlaylistUrls = Playlists.BeastSaberPlaylists.Values;
-        foreach (string url in webPlaylistUrls)
-        {
-            Task<BPList?> t = HighLevelTasks.GetWebBpList(url);
-            tasks.Add(t);
-        }
 
         await tasks.AwaitAll();
         
-        Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
-        Debug.Assert(tasks.TrueForAll(t => t.Result != null));
+        //Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
+        //Debug.Assert(tasks.TrueForAll(t => t.Result != null));
         
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
@@ -93,11 +90,10 @@ public class Program
         
         // todo: Generate spotify playlists
 
-        await Task.WhenAll(tasks.Cast<Task>().ToArray());
-        await Task.Delay(5000);
+        await tasks.AwaitAll();
         
-        Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
-        Debug.Assert(tasks.TrueForAll(t => t.Result != null));
+        // Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
+        // Debug.Assert(tasks.TrueForAll(t => t.Result != null));
         
         return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
     }
@@ -122,7 +118,7 @@ public class Program
         {
             Console.WriteLine("\n" + bpList.playlistTitle);
             Console.WriteLine("============================================");
-
+            
             foreach (SongInfo songInfo in bpList.songs)
             {
                 Console.WriteLine(songInfo.songName + " - " + songInfo.hash);
