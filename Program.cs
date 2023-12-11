@@ -18,23 +18,30 @@ public class Program
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
 
+        // download BPLists and wait for them to finish
         var getAllFilteredBpLists = GetFilteredBpLists(beatSaverApi);
         var getAllUnfilteredBpLists = GetUnfilteredBpLists(beatSaverApi);
         await getAllFilteredBpLists;
         await getAllUnfilteredBpLists;
+
+        // start downloading Beatmaps (map info)
+        List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = DownloadBeatmaps(getAllFilteredBpLists.Result, beatSaverApi);
+        List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = DownloadBeatmaps(getAllUnfilteredBpLists.Result, beatSaverApi);
         
-        var downloadUnfilteredBeatmaps = DownloadBeatmaps(getAllUnfilteredBpLists.Result, beatSaverApi);
-        var downloadFilteredBeatmaps = DownloadBeatmaps(getAllFilteredBpLists.Result, beatSaverApi);
-        await downloadUnfilteredBeatmaps;
-        await downloadFilteredBeatmaps;
-        List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmaps.Result.Where(b => b != null).Cast<Beatmap>().ToList();
-        List<Beatmap> filteredBeatmaps = downloadFilteredBeatmaps.Result.Where(b => b != null).Cast<Beatmap>().ToList();
-        
+        // wait for filtered beatmaps to finish downloading and then filter them
+        await downloadFilteredBeatmapsTasks.AwaitAll();
+        List<Beatmap> filteredBeatmaps = downloadFilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
         FilterOutput(filteredBeatmaps);
         
+        // wait for unfiltered beatmaps to finish downloading
+        await downloadFilteredBeatmapsTasks.AwaitAll();
+        List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
+
+        // prep output and cache directories
         FileManager.PrepareMapZipCacheDirectory();
         FileManager.PrepareOutputDirectories();
         
+        // download zip files and output map directories
         await DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
@@ -66,11 +73,8 @@ public class Program
             tasks.Add(t);
         }
 
-        foreach (Task<BPList> task in tasks)
-        {
-            await task;
-        }
-
+        await tasks.AwaitAll();
+        
         Debug.Assert(tasks.TrueForAll(t => t.IsCompletedSuccessfully));
         Debug.Assert(tasks.TrueForAll(t => t.Result != null));
         
@@ -110,7 +114,7 @@ public class Program
         }
     }
 
-    private static Task<Beatmap?[]> DownloadBeatmaps(IEnumerable<BPList> bpLists, BeatSaver beatSaverApi)
+    private static List<Task<Beatmap?>> DownloadBeatmaps(IEnumerable<BPList> bpLists, BeatSaver beatSaverApi)
     {
         List<Task<Beatmap?>> beatmapDownloadTasks = new();
         
@@ -126,7 +130,7 @@ public class Program
             }
         }
 
-        return Task.WhenAll(beatmapDownloadTasks);
+        return beatmapDownloadTasks;
     }
 
     private static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps)
