@@ -12,7 +12,7 @@ public static class MapDownloader
         
         foreach (BPList bpList in bpLists)
         {
-            Console.WriteLine("\n" + bpList.playlistTitle);
+            Console.WriteLine("\n" + bpList.playlistTitle + " (" + bpList.songs.Count + " Maps)");
             Console.WriteLine("============================================");
             
             foreach (SongInfo songInfo in bpList.songs)
