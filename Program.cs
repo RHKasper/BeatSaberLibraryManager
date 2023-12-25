@@ -15,8 +15,8 @@ public class Program
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
 
         // download BPLists and wait for them to finish
-        List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaverApi);
         List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi);
+        List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaverApi);
 
         // Write all BpList names to the console
         Console.WriteLine("\n\n==================== Playlists ====================");

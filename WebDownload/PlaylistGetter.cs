@@ -41,12 +41,6 @@ public static class PlaylistGetter
 	{
 		List<Task<BPList?>> tasks = new();
         
-		foreach (int id in Playlists.UnfilteredBeatSaverPlaylists.Values)
-		{
-			Task<BPList?> t = GetBeatSaverPlaylist(id, beatSaverApi);
-			tasks.Add(t);
-		}
-
 		SpotifyClient spotify = await CreateSpotifyClient();
 		foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
 		{
@@ -55,6 +49,12 @@ public static class PlaylistGetter
 
 		}
 		
+		foreach (int id in Playlists.UnfilteredBeatSaverPlaylists.Values)
+		{
+			Task<BPList?> t = GetBeatSaverPlaylist(id, beatSaverApi);
+			tasks.Add(t);
+		}
+
 		await tasks.AwaitAll();
 		return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result).ToList();
 	}

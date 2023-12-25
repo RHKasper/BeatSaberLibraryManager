@@ -47,6 +47,7 @@ namespace BeatSaberLibraryManager.WebDownload
 					if (track.Track is FullTrack fullTrack)
 					{
 						requestedTracks++;
+						Console.WriteLine("searching for " + fullTrack.Name + " by " + fullTrack.Artists[0].Name);
 						SearchTextFilterOption searchFilter = new SearchTextFilterOption
 						{
 							MaxNPS = MapFilters.MaxNps,
@@ -55,20 +56,25 @@ namespace BeatSaberLibraryManager.WebDownload
 							SortOrder = SortingOptions.Relevance,
 						};
 						Page? searchResults = await beatSaverApi.SearchBeatmaps(searchFilter);
-						Beatmap? bestMap = GetBestMap(fullTrack, searchResults);
-						if (bestMap != null)
+						if (searchResults != null)
 						{
-							Console.WriteLine($"\nTrack Found For: {fullTrack.Name} ({string.Join(", ", fullTrack.Artists.Select(a=>a.Name))}):");
-							Console.WriteLine($"\t{bestMap.Name}");
-							
-							BeatmapVersion version = bestMap.LatestVersion;
-							bpList.songs.Add(new SongInfo
+							Console.WriteLine("Got results back for search: " + fullTrack.Name + " by " + fullTrack.Artists.First());
+							Beatmap? bestMap = GetBestMap(fullTrack, searchResults);
+							if (bestMap != null)
 							{
-								hash = version.Hash,
-								key = version.Key ?? String.Empty,
-								songName = bestMap.Name,
-							});
-							foundTracks++;
+								Console.WriteLine(
+									$"\nTrack Found For: {fullTrack.Name} ({string.Join(", ", fullTrack.Artists.Select(a => a.Name))}):");
+								Console.WriteLine($"\t{bestMap.Name}");
+
+								BeatmapVersion version = bestMap.LatestVersion;
+								bpList.songs.Add(new SongInfo
+								{
+									hash = version.Hash,
+									key = version.Key ?? String.Empty,
+									songName = bestMap.Name,
+								});
+								foundTracks++;
+							}
 						}
 					}
 				}
