@@ -19,10 +19,12 @@ public class Program
         List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi);
 
         // Write all BpList names to the console
+        Console.WriteLine("\n\n==================== Playlists ====================");
         foreach (BPList bpList in filteredBpLists.Concat(unfilteredBpLists))
         {
             Console.WriteLine(bpList.playlistTitle);
         }
+        Console.WriteLine("========================================\n");
 
         // start downloading Beatmaps (map info)
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = MapDownloader.DownloadBeatmaps(filteredBpLists, beatSaverApi);
