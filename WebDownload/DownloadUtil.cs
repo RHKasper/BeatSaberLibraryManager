@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using Newtonsoft.Json;
 
 namespace BeatSaberLibraryManager.WebDownload
 {

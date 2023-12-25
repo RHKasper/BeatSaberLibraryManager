@@ -1,10 +1,8 @@
-using System.Diagnostics;
 using BeatSaberLibraryManager.MapEvaluation;
 using BeatSaberLibraryManager.Outputs;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using BeatSaverSharp.Models.Pages;
-using Newtonsoft.Json;
 using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.WebDownload

@@ -1,5 +1,4 @@
 ﻿using BeatSaverSharp.Models;
-using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.MapEvaluation
 {

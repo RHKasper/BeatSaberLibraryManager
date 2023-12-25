@@ -4,7 +4,6 @@ using BeatSaberLibraryManager.Outputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
-using BeatSaverSharp.Models.Pages;
 
 namespace BeatSaberLibraryManager;
 
