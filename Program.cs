@@ -11,27 +11,23 @@ namespace BeatSaberLibraryManager;
 
 public class Program
 {
-    private const int ZipDownloadTimeoutSeconds = 25;
-    
     public static async Task Main()
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
 
         // download BPLists and wait for them to finish
-        var getAllFilteredBpLists = GetFilteredBeatSaverBpLists(beatSaverApi);
-        var getAllUnfilteredBpLists = GetUnfilteredBpLists(beatSaverApi);
-        await getAllFilteredBpLists;
-        await getAllUnfilteredBpLists;
+        List<BPList> filteredBpLists = await GetFilteredBeatSaverBpLists(beatSaverApi);
+        List<BPList> unfilteredBpLists = await GetUnfilteredBpLists(beatSaverApi);
 
-        foreach (BPList bpList in getAllFilteredBpLists.Result.Concat(getAllUnfilteredBpLists.Result))
+        foreach (BPList bpList in filteredBpLists.Concat(unfilteredBpLists))
         {
             Console.WriteLine(bpList.playlistTitle);
         }
 
         // start downloading Beatmaps (map info)
-        List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = DownloadBeatmaps(getAllFilteredBpLists.Result, beatSaverApi);
-        List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = DownloadBeatmaps(getAllUnfilteredBpLists.Result, beatSaverApi);
+        List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = DownloadBeatmaps(filteredBpLists, beatSaverApi);
+        List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
         
         // wait for filtered beatmaps to finish downloading and then filter them
         await downloadFilteredBeatmapsTasks.AwaitAll();
@@ -42,6 +38,8 @@ public class Program
         await downloadFilteredBeatmapsTasks.AwaitAll();
         List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
 
+        // todo: Spotify process
+        
         // prep output and cache directories
         FileManager.PrepareMapZipCacheDirectory();
         FileManager.PrepareOutputDirectories();
@@ -52,7 +50,7 @@ public class Program
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
     }
 
-    private static async Task<IEnumerable<BPList>> GetFilteredBeatSaverBpLists(BeatSaver beatSaverApi)
+    private static async Task<List<BPList>> GetFilteredBeatSaverBpLists(BeatSaver beatSaverApi)
     {
         List<BPList> bpLists = new List<BPList>();
 
@@ -81,7 +79,7 @@ public class Program
         return bpLists;
     }
 
-    private static async Task<IEnumerable<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi)
+    private static async Task<List<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi)
     {
         List<Task<BPList?>> tasks = new();
         
@@ -94,7 +92,7 @@ public class Program
         // todo: Generate spotify playlists
 
         await tasks.AwaitAll();
-        return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result);
+        return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result).ToList();
     }
 
     private static void FilterOutput(List<Beatmap> beatmaps)
