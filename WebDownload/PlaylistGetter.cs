@@ -1,10 +1,9 @@
 ﻿using BeatSaberLibraryManager.Inputs;
-using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
 using BeatSaverSharp.Models.Pages;
 using Newtonsoft.Json;
 
-namespace BeatSaberLibraryManager;
+namespace BeatSaberLibraryManager.WebDownload;
 
 public static class PlaylistGetter
 {
