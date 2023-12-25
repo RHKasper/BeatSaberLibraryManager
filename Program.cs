@@ -47,6 +47,8 @@ public class Program
         await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
+        Console.WriteLine("Spotify => BeatSaver searches: " + SpotifyPlaylistConverter.SpotifyBeatsaverSearches);
+        Console.WriteLine("Spotify => BeatSaver searches saved by memoization: " + SpotifyPlaylistConverter.SearchesSavedByMemoization);
     }
     
     private static void FilterBeatmaps(List<Beatmap> beatmaps)
