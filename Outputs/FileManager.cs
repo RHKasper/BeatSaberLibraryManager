@@ -1,11 +1,12 @@
 ﻿using System.IO.Compression;
 using BeatSaverSharp.Models;
+using Newtonsoft.Json;
 
 namespace BeatSaberLibraryManager.Outputs
 {
 	public static class FileManager
 	{
-		public const string MapCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/MapCache";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
+		public const string MapCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/MapZips";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
 		public const string ImagesCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/Images";// "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
 		
 		public const string MapsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/CustomLevels";//"C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
@@ -30,8 +31,6 @@ namespace BeatSaberLibraryManager.Outputs
 		}
 
 
-		public static string GetMapDirectory(Beatmap beatmap) => GetMapDirectory(GetZipFilePath(GetZipFileName(beatmap)));
-
 		public static string GetMapDirectory(string zipFilePath)
 		{
 			string targetDir = Path.Combine(MapsOutputFolderPath, Path.GetFileNameWithoutExtension(zipFilePath));
@@ -55,7 +54,6 @@ namespace BeatSaberLibraryManager.Outputs
 				zipFileName = zipFileName.Replace(c, ' ');
 			return zipFileName;
 		}
-		
 
 		public static void PrepareWorkingDirectories()
 		{
@@ -74,22 +72,6 @@ namespace BeatSaberLibraryManager.Outputs
 			if (Directory.Exists(ImagesCachePath))
 				Directory.Delete(ImagesCachePath, true);
 			Directory.CreateDirectory(ImagesCachePath);
-		}
-		
-		public static void ExportMaps(IEnumerable<string> mapFolderPaths)
-		{
-			foreach (string mapFolderPath in mapFolderPaths)
-			{
-				if (Directory.Exists(mapFolderPath))
-				{
-					string filename = Path.GetFileName(mapFolderPath);
-					string target = Path.Combine(MapsOutputFolderPath, filename);
-					Console.WriteLine($"Copying {mapFolderPath} to {target}");
-					CopyDirectory(mapFolderPath, target);
-				}
-				else
-					Console.WriteLine($"Map Directory {mapFolderPath} doesn't exist");
-			}
 		}
 
 		static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)
@@ -126,14 +108,14 @@ namespace BeatSaberLibraryManager.Outputs
 			
 		}
 
-		public static void TransferMapsToOutputFolder()
-		{
-			throw new NotImplementedException();
-		}
-
 		public static void OutputPlaylists(IEnumerable<BPList> playlists)
 		{
-			throw new NotImplementedException();
+			foreach (BPList bpList in playlists)
+			{
+				string serializedBpList = JsonConvert.SerializeObject(bpList);
+				string path = Path.Combine(PlaylistsOutputFolderPath, bpList.playlistTitle + ".bplist");
+				File.WriteAllText(path, serializedBpList);
+			}
 		}
 	}
 }

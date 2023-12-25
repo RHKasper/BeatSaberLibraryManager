@@ -46,7 +46,6 @@ public class Program
         await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
         
         // Output map folders and playlist files
-        FileManager.TransferMapsToOutputFolder();
         FileManager.OutputPlaylists(filteredBpLists.Concat(unfilteredBpLists));
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
