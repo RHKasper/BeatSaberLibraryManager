@@ -39,12 +39,15 @@ public class Program
         await downloadFilteredBeatmapsTasks.AwaitAll();
         List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
 
-        // prep output and cache directories
-        FileManager.PrepareMapZipCacheDirectory();
-        FileManager.PrepareOutputDirectories();
+        // prep working directories
+        FileManager.PrepareWorkingDirectories();
         
-        // download zip files and output map directories
+        // download zip files
         await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
+        
+        // Output map folders and playlist files
+        FileManager.TransferMapsToOutputFolder();
+        FileManager.OutputPlaylists(filteredBpLists.Concat(unfilteredBpLists));
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
     }

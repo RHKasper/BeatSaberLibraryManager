@@ -52,7 +52,6 @@ public static class PlaylistGetter
 		{
 			Task<BPList?> t = SpotifyPlaylistConverter.GenerateBeatSaberPlaylist(spotifyPlaylistUrl, beatSaverApi, spotify);
 			tasks.Add(t);
-
 		}
 		
 		await tasks.AwaitAll();

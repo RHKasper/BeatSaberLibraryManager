@@ -5,11 +5,11 @@ namespace BeatSaberLibraryManager.Outputs
 {
 	public static class FileManager
 	{
-		public const string MapCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
-		public const string ImagesCachePath = "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
+		public const string MapCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/MapCache";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
+		public const string ImagesCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/Images";// "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
 		
-		public const string MapsOutputFolderPath = "C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
-		public const string PlaylistsOutputFolderPath = "C:\\repos\\BeatSaberLibraryManager\\output\\Playlists";
+		public const string MapsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/CustomLevels";//"C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
+		public const string PlaylistsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/Playlists";//"C:\\repos\\BeatSaberLibraryManager\\output\\Playlists";
 		
 		public static void UnzipFile(string zipFilePath, out string unzipDir)
 		{
@@ -57,7 +57,7 @@ namespace BeatSaberLibraryManager.Outputs
 		}
 		
 
-		public static void PrepareOutputDirectories()
+		public static void PrepareWorkingDirectories()
 		{
 			if (Directory.Exists(MapsOutputFolderPath))
 				Directory.Delete(MapsOutputFolderPath, true);
@@ -66,18 +66,11 @@ namespace BeatSaberLibraryManager.Outputs
 			if (Directory.Exists(PlaylistsOutputFolderPath))
 				Directory.Delete(PlaylistsOutputFolderPath, true);
 			Directory.CreateDirectory(PlaylistsOutputFolderPath);
-		}
-		
-		public static void PrepareMapZipCacheDirectory()
-		{
+			
 			if (Directory.Exists(MapCachePath))
 				Directory.Delete(MapCachePath, true);
 			Directory.CreateDirectory(MapCachePath);
-		}
 		
-		
-		public static void ClearImagesCache()
-		{
 			if (Directory.Exists(ImagesCachePath))
 				Directory.Delete(ImagesCachePath, true);
 			Directory.CreateDirectory(ImagesCachePath);
@@ -131,6 +124,16 @@ namespace BeatSaberLibraryManager.Outputs
 				}
 			}
 			
+		}
+
+		public static void TransferMapsToOutputFolder()
+		{
+			throw new NotImplementedException();
+		}
+
+		public static void OutputPlaylists(IEnumerable<BPList> playlists)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }
