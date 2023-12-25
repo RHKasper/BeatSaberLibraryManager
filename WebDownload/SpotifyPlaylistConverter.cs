@@ -112,10 +112,10 @@ namespace BeatSaberLibraryManager.WebDownload
 
         public static Beatmap? GetBestMap(FullTrack fullTrack, Page searchResults)
         {
-            List<Beatmap> acceptableOptions = new List<Beatmap>();
+            List<Beatmap?> acceptableOptions = new List<Beatmap?>();
             for (int i = searchResults.Beatmaps.Count - 1; i >= 0; i--)
             {
-                Beatmap beatmap = searchResults.Beatmaps[i];
+                Beatmap? beatmap = searchResults.Beatmaps[i];
                 BeatmapVersion version = beatmap.LatestVersion;
 
                 if (!beatmap.FailsAnyQualityFilter() &&

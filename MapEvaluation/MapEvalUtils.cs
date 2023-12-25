@@ -23,6 +23,6 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			return result;
 		}
 
-		public static int FindWordsInMapName(this Beatmap beatmap, string[] words) => words.Count(w => beatmap.Name.Contains(w, StringComparison.OrdinalIgnoreCase));
+		public static int FindWordsInMapName(this Beatmap? beatmap, string[] words) => words.Count(w => beatmap.Name.Contains(w, StringComparison.OrdinalIgnoreCase));
 	}
 }

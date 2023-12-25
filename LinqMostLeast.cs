@@ -7,15 +7,15 @@
         /// <see cref="valueAssignmentFunction"/>. For example, this could find the player with the most health.
         /// </summary>
         /// <returns>the first element that evaluates to the greatest value with the <see cref="valueAssignmentFunction"/> </returns>
-        public static T Most<T>(this IEnumerable<T> collection, Func<T, double> valueAssignmentFunction)
+        public static T? Most<T>(this IEnumerable<T?> collection, Func<T?, double> valueAssignmentFunction)
         {
-            T bestElement = default;
+            T? bestElement = default;
             double bestValue = default;
-            bool firstRun = true;
+            var firstRun = true;
 
-            foreach (T element in collection)
+            foreach (var element in collection)
             {
-                double tempValue = valueAssignmentFunction.Invoke(element);
+                var tempValue = valueAssignmentFunction.Invoke(element);
                 
                 if (firstRun || tempValue > bestValue)
                 {
@@ -33,15 +33,15 @@
         /// <see cref="valueAssignmentFunction"/>. For example, this could find the player with the least health.
         /// </summary>
         /// <returns>the first element that evaluates to the least value with the <see cref="valueAssignmentFunction"/> </returns>
-        public static T Least<T>(this IEnumerable<T> collection, Func<T, double> valueAssignmentFunction)
+        public static T? Least<T>(this IEnumerable<T?> collection, Func<T?, double> valueAssignmentFunction)
         {
-            T bestElement = default;
+            T? bestElement = default;
             double bestValue = default;
-            bool firstRun = true;
+            var firstRun = true;
 
-            foreach (T element in collection)
+            foreach (var element in collection)
             {
-                double tempValue = valueAssignmentFunction.Invoke(element);
+                var tempValue = valueAssignmentFunction.Invoke(element);
                 
                 if (firstRun || tempValue < bestValue)
                 {

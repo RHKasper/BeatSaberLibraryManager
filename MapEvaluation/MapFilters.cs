@@ -50,7 +50,7 @@ namespace BeatSaberLibraryManager.MapEvaluation
 				return doc.stats.score < MinScore;
 		}
 		
-		public static bool FailsAnyQualityFilter(this Beatmap map)
+		public static bool FailsAnyQualityFilter(this Beatmap? map)
 		{
 			BeatmapVersion v = map.LatestVersion;
 			return map.IsPoorlyRated() || v.HasTooManyParityErrors() || v.NpsIsTooHigh();
@@ -76,7 +76,7 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			return version.Difficulties.All(d => d.NPS > MaxNps);
 		}
 
-		public static bool IsPoorlyRated(this Beatmap beatmap)
+		public static bool IsPoorlyRated(this Beatmap? beatmap)
 		{
 			bool hasManyRatings = beatmap.Stats.Upvotes + beatmap.Stats.Downvotes > 50;
 
