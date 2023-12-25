@@ -1,4 +1,6 @@
-﻿namespace BeatSaberLibraryManager.MapEvaluation
+﻿using BeatSaverSharp.Models;
+
+namespace BeatSaberLibraryManager.MapEvaluation
 {
 	public static class MapEvalUtils
 	{
@@ -21,6 +23,6 @@
 			return result;
 		}
 
-		public static int FindWordsInMapName(this Doc doc, string[] words) => words.Count(w => doc.name.Contains(w, StringComparison.OrdinalIgnoreCase));
+		public static int FindWordsInMapName(this Beatmap beatmap, string[] words) => words.Count(w => beatmap.Name.Contains(w, StringComparison.OrdinalIgnoreCase));
 	}
 }

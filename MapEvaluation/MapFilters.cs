@@ -8,6 +8,17 @@ namespace BeatSaberLibraryManager.MapEvaluation
 	/// </summary>
 	public static class MapFilters
 	{
+		public const float MaxNps = 6.5f;
+		public const float MinScore = .7f;
+		public const float MinScoreForManyRatings = .8f;
+
+		public static readonly BeatmapDifficulty.BeatSaverBeatmapDifficulty[] AcceptableSpotifyDifficulties = 
+		{
+			BeatmapDifficulty.BeatSaverBeatmapDifficulty.Hard, 
+			BeatmapDifficulty.BeatSaverBeatmapDifficulty.Expert,
+			BeatmapDifficulty.BeatSaverBeatmapDifficulty.ExpertPlus
+		};
+
 		public static bool FailsAnyQualityFilter(this Doc d)
 		{
 			Version v = d.GetLatestVersion();
@@ -25,9 +36,9 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			return false;
 		}
 
-		public static bool NpsIsTooHigh(this Version version, float maxNps = 6.5f)
+		private static bool NpsIsTooHigh(this Version version)
 		{
-			return version.diffs.All(d => d.nps > maxNps);
+			return version.diffs.All(d => d.nps > MaxNps);
 		}
 
 		public static bool IsPoorlyRated(this Doc doc)
@@ -35,9 +46,9 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			bool hasManyRatings = doc.stats.upvotes + doc.stats.downvotes > 50;
 
 			if (hasManyRatings)
-				return doc.stats.score < .8f;
+				return doc.stats.score < MinScoreForManyRatings;
 			else
-				return doc.stats.score < .7f;
+				return doc.stats.score < MinScore;
 		}
 		
 		public static bool FailsAnyQualityFilter(this Beatmap map)
@@ -61,9 +72,9 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			return false;
 		}
 
-		public static bool NpsIsTooHigh(this BeatmapVersion version, float maxNps = 6.5f)
+		public static bool NpsIsTooHigh(this BeatmapVersion version)
 		{
-			return version.Difficulties.All(d => d.NPS > maxNps);
+			return version.Difficulties.All(d => d.NPS > MaxNps);
 		}
 
 		public static bool IsPoorlyRated(this Beatmap beatmap)
@@ -71,20 +82,11 @@ namespace BeatSaberLibraryManager.MapEvaluation
 			bool hasManyRatings = beatmap.Stats.Upvotes + beatmap.Stats.Downvotes > 50;
 
 			if (hasManyRatings)
-				return beatmap.Stats.Score < .8f;
+				return beatmap.Stats.Score < MinScoreForManyRatings;
 			else
-				return beatmap.Stats.Score < .7f;
+				return beatmap.Stats.Score < MinScore;
 		}
 
-		public static bool HasAnyOfRequestedDifficulties(this Version v, string[] desiredDiffs) => v.diffs.Any(d => desiredDiffs.Any(desired => d.difficulty == desired));
-
-		public static bool ContainsArtistName(this Doc doc, FullTrack fullTrack)
-		{
-			string[] artistNameWords = MapEvalUtils.FilterToJustAlphaNumerics(fullTrack.Artists.First().Name).Split(' ');
-			int artistNameWordsFound = doc.FindWordsInMapName(artistNameWords);
-			bool containsArtistName = artistNameWordsFound > .7f * artistNameWords.Length;
-
-			return containsArtistName;
-		}
+		public static bool HasAnyOfRequestedDifficulties(this BeatmapVersion v, BeatmapDifficulty.BeatSaverBeatmapDifficulty[] desiredDiffs) => v.Difficulties.Any(d => desiredDiffs.Any(desired => d.Difficulty == desired));
 	}
 }

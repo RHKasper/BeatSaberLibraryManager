@@ -2,6 +2,7 @@
 using BeatSaverSharp;
 using BeatSaverSharp.Models.Pages;
 using Newtonsoft.Json;
+using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.WebDownload;
 
@@ -45,9 +46,15 @@ public static class PlaylistGetter
 			Task<BPList?> t = GetBeatSaverPlaylist(id, beatSaverApi);
 			tasks.Add(t);
 		}
-        
-		// todo: Generate spotify playlists
 
+		SpotifyClient spotify = await CreateSpotifyClient();
+		foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
+		{
+			Task<BPList?> t = SpotifyPlaylistConverter.GenerateBeatSaberPlaylist(spotifyPlaylistUrl, beatSaverApi, spotify);
+			tasks.Add(t);
+
+		}
+		
 		await tasks.AwaitAll();
 		return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result).ToList();
 	}
@@ -79,5 +86,15 @@ public static class PlaylistGetter
 	{
 		string? message = await DownloadUtil.Get(url);
 		return message != null ? JsonConvert.DeserializeObject<BPList>(message) : null;
+	}
+	
+	// todo: don't store credentials in repo
+	private static async Task<SpotifyClient> CreateSpotifyClient()
+	{
+		var config = SpotifyClientConfig.CreateDefault();
+		var request = new ClientCredentialsRequest("1d303e20e9c8498f95c8d39f244b143d", "45648a39b896462594915ed2d7d48714");
+		var response = await new OAuthClient(config).RequestToken(request);
+		var spotify = new SpotifyClient(config.WithToken(response.AccessToken));
+		return spotify;
 	}
 }

@@ -1,25 +1,26 @@
-﻿using SpotifyAPI.Web;
+﻿using BeatSaverSharp.Models;
+using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.MapEvaluation
 {
 	public static class MapScorers
 	{
-		public static double ScoreOverall(this Doc doc, FullTrack fullTrack)
+		public static double ScoreOverall(this Beatmap beatmap, FullTrack fullTrack)
 		{
-			return doc.ScoreOnRating() * doc.ScoreOnSongNameMatch(fullTrack);
+			return beatmap.ScoreOnRating() * beatmap.ScoreOnSongNameMatch(fullTrack);
 		}
 		
-		public static double ScoreOnSongNameMatch(this Doc doc, FullTrack fullTrack)
+		public static double ScoreOnSongNameMatch(this Beatmap beatmap, FullTrack fullTrack)
 		{
 			string[] trackNameWords = MapEvalUtils.FilterToJustAlphaNumerics(fullTrack.Name).Split(' ');
-			int trackNameWordsFound = doc.FindWordsInMapName(trackNameWords);
+			int trackNameWordsFound = beatmap.FindWordsInMapName(trackNameWords);
 			double matchScore = trackNameWordsFound / .8f * trackNameWords.Length;
 			return matchScore.Remap(0, 1, .75f, 1);
 		}
 
-		public static double ScoreOnRating(this Doc doc)
+		public static double ScoreOnRating(this Beatmap beatmap)
 		{
-			return doc.stats.score;
+			return beatmap.Stats.Score;
 		}
 	}
 }
