@@ -54,7 +54,7 @@ public class Program
     {
         List<BPList> bpLists = new List<BPList>();
 
-        //Download all beatsaver playlists
+        //Download beatsaver playlists
         foreach (int id in Playlists.FilteredBeatSaverPlaylists.Values)
         {
             BPList? bpList = await HighLevelTasks.GetBeatSaverPlaylist(id, beatSaverApi);
@@ -65,7 +65,7 @@ public class Program
             }
         }
         
-        //Download all beatsaver mapper playlists
+        //Download beatsaver mapper playlists
         foreach (string url in Playlists.BeatSaverMapperPlaylists.Values)
         {
             BPList? bpList = await HighLevelTasks.GetBeatSaverMapperPlaylist(url);
