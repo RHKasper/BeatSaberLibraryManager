@@ -77,6 +77,8 @@ public static class MapDownloader
                         Console.WriteLine("Retrying (#" + retryCount + ") download for " + beatmap.Name);
                         zipFileDownloadAndUnzipTasks.Add(DownloadAndUnzipZipFile(beatmap), beatmap);
                     }
+
+                    secondsSinceNumWaitingTasksChanged = 0;
                 }
             }
         }
