@@ -18,7 +18,7 @@ namespace BeatSaberLibraryManager.MapEvaluation
 		{
 			foreach (Diff diff in v.diffs)
 			{
-				if(diff.difficulty != Diff.Normal && diff.difficulty != Diff.Easy)
+				if(diff.difficulty == Diff.Expert || diff.difficulty == Diff.ExpertPlus)
 					if (diff.paritySummary.errors > maxParityErrors)
 						return true;
 			}
