@@ -52,7 +52,7 @@ namespace BeatSaberLibraryManager.WebDownload
 
             if (Path.HasExtension(path) == false)
             {
-                Console.WriteLine($"{path} doesn't have a file extension. Assuming it's a .png file.");
+                //Console.WriteLine($"{path} doesn't have a file extension. Assuming it's a .png file.");
                 path += ".png";
             }
 

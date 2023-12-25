@@ -4,6 +4,7 @@ using BeatSaberLibraryManager.Outputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
+using BeatSaverSharp.Models.Pages;
 
 namespace BeatSaberLibraryManager;
 
@@ -13,7 +14,7 @@ public class Program
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
-
+        
         // download BPLists and wait for them to finish
         List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi);
         List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaverApi);
