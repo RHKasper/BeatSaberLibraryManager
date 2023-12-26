@@ -147,8 +147,8 @@ namespace BeatSaberLibraryManager.WebDownload
             string? clientId =  appConfig["SpotifyClientId"];
             string? clientSecret = appConfig["SpotifyClientSecret"];
 
-            Debug.Assert(clientId != null);
-            Debug.Assert(clientSecret != null);
+            Debug.Assert(clientId != null, " \"SpotifyClientId\" must be set in the secrets.json file");
+            Debug.Assert(clientSecret != null, " \"SpotifyClientSecret\" must be set in the secrets.json file");
 
             return (clientId, clientSecret);
         }
