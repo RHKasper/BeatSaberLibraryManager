@@ -2,15 +2,19 @@
 using BeatSaverSharp.Models;
 using Newtonsoft.Json;
 
-namespace BeatSaberLibraryManager.Outputs
+namespace BeatSaberLibraryManager
 {
 	public static class FileManager
 	{
-		public const string MapCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/MapZips";//"C:\\repos\\BeatSaberLibraryManager\\Cache\\MapCache";
-		public const string ImagesCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/Images";// "C:\\repos\\BeatSaberLibraryManager\\Cache\\Images";
+		//public const string MapCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/MapZips";
+		//public const string ImagesCachePath = "/Users/robert/Repos/BeatSaberLibraryManager/Cache/Images";
+		//public const string MapsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/CustomLevels";
+		//public const string PlaylistsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/Playlists";
 		
-		public const string MapsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/CustomLevels";//"C:\\repos\\BeatSaberLibraryManager\\output\\CustomLevels";
-		public const string PlaylistsOutputFolderPath = "/Users/robert/Repos/BeatSaberLibraryManager/Outputs/Playlists";//"C:\\repos\\BeatSaberLibraryManager\\output\\Playlists";
+		public const string MapCachePath = @"C:\repos\BeatSaberLibraryManager\Cache\MapCache";
+		public const string ImagesCachePath = @"C:\repos\BeatSaberLibraryManager\Cache\Images";
+		public const string MapsOutputFolderPath = @"C:\repos\BeatSaberLibraryManager\output\CustomLevels";
+		public const string PlaylistsOutputFolderPath = @"C:\repos\BeatSaberLibraryManager\output\Playlists";
 		
 		public static void UnzipFile(string zipFilePath, out string unzipDir)
 		{

@@ -1,4 +1,3 @@
-using BeatSaberLibraryManager.Outputs;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 

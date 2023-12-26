@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using BeatSaberLibraryManager.MapEvaluation;
-using BeatSaberLibraryManager.Outputs;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using BeatSaverSharp.Models.Pages;
