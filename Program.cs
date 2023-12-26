@@ -4,6 +4,7 @@ using BeatSaberLibraryManager.Outputs;
 using BeatSaberLibraryManager.WebDownload;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
+using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager;
 
@@ -13,20 +14,24 @@ public class Program
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
+        SpotifyClient spotify = await SpotifyPlaylistConverter.CreateSpotifyClient();
+        Console.WriteLine("Spotify and BeatSaver client init complete");
         
         // download BPLists and wait for them to finish
+        Console.WriteLine("Downloading and generating BeatSaber Playlists");
         List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaverApi);
-        List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi);
+        List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi, spotify);
 
         // Write all BpList names to the console
-        Console.WriteLine("\n\n==================== Playlists ====================");
+        Console.WriteLine("\n\n==================== Downloaded and Generated Playlists ====================");
         foreach (BPList bpList in filteredBpLists.Concat(unfilteredBpLists))
         {
             Console.WriteLine(bpList.playlistTitle + " (" + bpList.songs.Count + " Maps)");
         }
         Console.WriteLine("========================================\n");
-
+        
         // start downloading Beatmaps (map info)
+        Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = MapDownloader.DownloadBeatmaps(filteredBpLists, beatSaverApi);
         List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = MapDownloader.DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
         
@@ -38,11 +43,13 @@ public class Program
         // wait for unfiltered beatmaps to finish downloading
         await downloadFilteredBeatmapsTasks.AwaitAll();
         List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
+        Console.WriteLine("Beatmap downloading and filtering complete.");
 
         // prep working directories
         FileManager.PrepareWorkingDirectories();
         
         // download zip files
+        Console.WriteLine("Starting map .zip file downloads");
         await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
         
         // Output map folders and playlist files

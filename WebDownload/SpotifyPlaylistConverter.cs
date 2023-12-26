@@ -1,8 +1,10 @@
+using System.Diagnostics;
 using BeatSaberLibraryManager.MapEvaluation;
 using BeatSaberLibraryManager.Outputs;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using BeatSaverSharp.Models.Pages;
+using Microsoft.Extensions.Configuration;
 using SpotifyAPI.Web;
 
 namespace BeatSaberLibraryManager.WebDownload
@@ -127,6 +129,28 @@ namespace BeatSaberLibraryManager.WebDownload
             }
 
             return acceptableOptions.Most(beatmap => beatmap.ScoreOverall(fullTrack));
+        }
+        
+        public static async Task<SpotifyClient> CreateSpotifyClient()
+        {
+            var config = SpotifyClientConfig.CreateDefault();
+            var credentials = GetSpotifyCredentials();
+            var request = new ClientCredentialsRequest(credentials.clientId, credentials.clientSecret);
+            var response = await new OAuthClient(config).RequestToken(request);
+            var spotify = new SpotifyClient(config.WithToken(response.AccessToken));
+            return spotify;
+        }
+
+        private static (string clientId, string clientSecret) GetSpotifyCredentials()
+        {
+            var appConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+            string? clientId =  appConfig["SpotifyClientId"];
+            string? clientSecret = appConfig["SpotifyClientSecret"];
+
+            Debug.Assert(clientId != null);
+            Debug.Assert(clientSecret != null);
+
+            return (clientId, clientSecret);
         }
     }
 }

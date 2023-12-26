@@ -37,7 +37,7 @@ public static class PlaylistGetter
 		return bpLists;
 	}
 
-	public static async Task<List<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi)
+	public static async Task<List<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi, SpotifyClient spotify)
 	{
 		List<Task<BPList?>> tasks = new();
 
@@ -47,7 +47,6 @@ public static class PlaylistGetter
 			tasks.Add(t);
 		}
 
-		SpotifyClient spotify = await CreateSpotifyClient();
 		foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
 		{
 			Task<BPList?> t = SpotifyPlaylistConverter.GenerateBeatSaberPlaylist(spotifyPlaylistUrl, beatSaverApi, spotify);
@@ -85,15 +84,5 @@ public static class PlaylistGetter
 	{
 		string? message = await DownloadUtil.Get(url);
 		return message != null ? JsonConvert.DeserializeObject<BPList>(message) : null;
-	}
-	
-	// todo: don't store credentials in repo
-	private static async Task<SpotifyClient> CreateSpotifyClient()
-	{
-		var config = SpotifyClientConfig.CreateDefault();
-		var request = new ClientCredentialsRequest("1d303e20e9c8498f95c8d39f244b143d", "45648a39b896462594915ed2d7d48714");
-		var response = await new OAuthClient(config).RequestToken(request);
-		var spotify = new SpotifyClient(config.WithToken(response.AccessToken));
-		return spotify;
 	}
 }
