@@ -16,10 +16,11 @@ public class Program
         SpotifyClient spotify = await SpotifyPlaylistConverter.CreateSpotifyClient();
         Console.WriteLine("Spotify and BeatSaver client init complete");
 
+        // todo: add the ability to skip this step and read from cache
         // Generate BpLists and cache result to file
         (List<BPList> filteredBpLists, List<BPList> unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
         FileManager.CacheBpListsPreFilter(filteredBpLists, unfilteredBpLists);
-        
+
         // start downloading Beatmaps (map info)
         Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = MapDownloader.DownloadBeatmaps(filteredBpLists, beatSaverApi);
