@@ -24,38 +24,48 @@ public static class MapDownloader
 
     public static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps, BeatSaver beatSaverClient)
     {
-        int maxRetries = 4;
-        int msBeforeRetry = 5000;
-        int waitInterval = 100;
-        
+        Console.WriteLine("Requesting " + beatmaps.Count + " map zip files");
+
         foreach (Beatmap beatmap in beatmaps)
         {
-            Console.WriteLine("Requesting download for " + beatmap.Name);
             var task = DownloadAndUnzipZipFile(beatmap, beatSaverClient);
             await task;
         }
 
-        Console.WriteLine("Requested " + beatmaps.Count + " map zip files");
     }
 
     private static async Task<string?> DownloadAndUnzipZipFile(Beatmap beatmap, BeatSaver beatSaver)
     {
-        Task<byte[]?> downloadZipContents = beatSaver.DownloadZIP(beatmap.LatestVersion);
-        await downloadZipContents;
-
-        if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
+        string mapDirectory = FileManager.GetMapDirectory(beatmap);
+        
+        if (Cache.MapFolders.ContainsKey(beatmap.ID))
         {
-            Console.WriteLine("Downloaded .zip byte[] for " + beatmap.Name);
-            
-            string zipFilePath = FileManager.GetZipFilePath(beatmap);
-            await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result);
-            FileManager.UnzipFile(zipFilePath, out var mapFolderPath);
-            Console.WriteLine("Unzipped map to: " + mapFolderPath);
-            return mapFolderPath;
+            Console.WriteLine("\tFound map folder in cache: " + beatmap.Name);
+            FileManager.CopyDirectory(Cache.MapFolders[beatmap.ID], mapDirectory);
+            return Cache.MapFolders[beatmap.ID];
         }
         else
         {
-            Console.WriteLine("Failed to download zip file for " + beatmap.Name);
+            Console.WriteLine("Downloading .zip byte[] for " + beatmap.Name);
+
+            Task<byte[]?> downloadZipContents = beatSaver.DownloadZIP(beatmap.LatestVersion);
+            await downloadZipContents;
+
+            if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
+            {
+                string zipFilePath = FileManager.GetZipFilePath(beatmap);
+                Console.WriteLine("\tDownloaded .zip byte[] for " + beatmap.Name);
+                await File.WriteAllBytesAsync(zipFilePath, downloadZipContents.Result);
+                FileManager.UnzipFile(zipFilePath, mapDirectory);
+                Console.WriteLine("\tUnzipped map to: " + mapDirectory);
+                Cache.CacheMapFolder(mapDirectory);
+                
+                return mapDirectory;
+            }
+            else
+            {
+                Console.WriteLine("Failed to download zip file for " + beatmap.Name);
+            }
         }
 
         return null;

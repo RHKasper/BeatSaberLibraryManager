@@ -20,7 +20,7 @@ namespace BeatSaberLibraryManager
 		public static string cacheFolderPath { get; }
 		public static string preFilterBpListsCacheFolderPath {get; }
 		public static string beatmapsCacheFolderPath {get; }
-		public static string mapZipCacheFolderPath {get; }
+		public static string mapFolderCacheFolderPath {get; }
 
 		#endregion
 
@@ -37,7 +37,7 @@ namespace BeatSaberLibraryManager
 			cacheFolderPath = Path.Combine(outputDirectory, "Cache");
 			preFilterBpListsCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists");
 			beatmapsCacheFolderPath = Path.Combine(cacheFolderPath, "Beatmaps");
-			mapZipCacheFolderPath = Path.Combine(cacheFolderPath, "MapZips");
+			mapFolderCacheFolderPath = Path.Combine(cacheFolderPath, "MapFolders");
 
 			mapsOutputFolderPath = Path.Combine(outputDirectory, "CustomLevels");
 			playlistsOutputFolderPath = Path.Combine(outputDirectory, "Playlists");
@@ -46,15 +46,13 @@ namespace BeatSaberLibraryManager
 			Console.WriteLine("Initialized FileManager");
 		}
 
-		public static void UnzipFile(string zipFilePath, out string unzipDir)
+		public static void UnzipFile(string zipFilePath, string targetDir)
 		{
-			unzipDir = GetMapDirectory(zipFilePath);
-
 			try
 			{
-				if(Directory.Exists(unzipDir)) 
-					Directory.Delete(unzipDir, true);
-				ZipFile.ExtractToDirectory(zipFilePath, unzipDir);
+				if(Directory.Exists(targetDir)) 
+					Directory.Delete(targetDir, true);
+				ZipFile.ExtractToDirectory(zipFilePath, targetDir);
 			}
 			catch(Exception e)
 			{
@@ -64,6 +62,8 @@ namespace BeatSaberLibraryManager
 			File.Delete(zipFilePath);
 		}
 
+		public static string GetMapDirectory(Beatmap beatmap) => GetMapDirectory(GetZipFilePath(beatmap));
+		
 		public static string GetMapDirectory(string zipFilePath)
 		{
 			string targetDir = Path.Combine(mapsOutputFolderPath, Path.GetFileNameWithoutExtension(zipFilePath));
@@ -95,7 +95,7 @@ namespace BeatSaberLibraryManager
 			EnsureDirectoryExists(cacheFolderPath);
 			EnsureDirectoryExists(preFilterBpListsCacheFolderPath);
 			EnsureDirectoryExists(beatmapsCacheFolderPath);
-			EnsureDirectoryExists(mapZipCacheFolderPath);
+			EnsureDirectoryExists(mapFolderCacheFolderPath);
 
 			ClearOrCreateDirectory(mapsOutputFolderPath);
 			ClearOrCreateDirectory(playlistsOutputFolderPath);
@@ -126,6 +126,39 @@ namespace BeatSaberLibraryManager
 				Directory.CreateDirectory(path);
 		}
 
+		public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive = true)
+		{
+			// Get information about the source directory
+			var dir = new DirectoryInfo(sourceDir);
+
+			// Check if the source directory exists
+			if (!dir.Exists)
+				throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+
+			// Cache directories before we start copying
+			DirectoryInfo[] dirs = dir.GetDirectories();
+
+			// Create the destination directory
+			Directory.CreateDirectory(destinationDir);
+
+			// Get the files in the source directory and copy to the destination directory
+			foreach (FileInfo file in dir.GetFiles())
+			{
+				string targetFilePath = Path.Combine(destinationDir, file.Name);
+				file.CopyTo(targetFilePath);
+			}
+
+			// If recursive and copying subdirectories, recursively call this method
+			if (recursive)
+			{
+				foreach (DirectoryInfo subDir in dirs)
+				{
+					string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+					CopyDirectory(subDir.FullName, newDestinationDir, true);
+				}
+			}
+		}
+
 		public static Dictionary<string,Beatmap> GetCachedBeatmaps()
 		{
 			Dictionary<string, Beatmap> beatmaps = new Dictionary<string, Beatmap>();
@@ -152,6 +185,18 @@ namespace BeatSaberLibraryManager
 			}
 
 			return cachedBpLists;
+		}
+
+		public static Dictionary<string, string> GetCachedMapFolders()
+		{
+			Dictionary<string, string> cachedMapFolders = new Dictionary<string, string>();
+			
+			foreach (string filePath in Directory.GetDirectories(mapFolderCacheFolderPath))
+			{
+				cachedMapFolders.Add(filePath.GetKeyFromMapFolderPath(), filePath);
+			}
+
+			return cachedMapFolders;
 		}
 	}
 }

@@ -19,4 +19,16 @@ public static class Extensions
 		var newName = String.Join("_", originalFileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries) ).TrimEnd('.');
 		return newName;
 	}
+
+	public static string GetKeyFromMapFolderPath(this string mapFolderPath)
+	{
+		return RemoveWhitespace(mapFolderPath.Split("-").Last());
+	}
+	
+	public static string RemoveWhitespace(this string input)
+	{
+		return new string(input.ToCharArray()
+			.Where(c => !Char.IsWhiteSpace(c))
+			.ToArray());
+	}
 }

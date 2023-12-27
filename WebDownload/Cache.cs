@@ -8,11 +8,17 @@ public static class Cache
     public static Dictionary<string, BPList> PreFilterBpLists {get; private set;}
     public static Dictionary<string, Beatmap> Beatmaps {get; private set;}
     public static Dictionary<string, Beatmap?> SpotifySearchResults { get; private set; }
+    
+    /// <summary>
+    /// key/ID => file path
+    /// </summary>
+    public static Dictionary<string, string> MapFolders { get; private set; }
 
     public static void InitializeCache()
     {
         PreFilterBpLists = FileManager.GetCachedPreFilterBpLists();
         Beatmaps = FileManager.GetCachedBeatmaps();
+        MapFolders = FileManager.GetCachedMapFolders();
     }
     
     public static void CacheBeatmap(SongInfo songInfo, Beatmap beatmap)
@@ -29,4 +35,9 @@ public static class Cache
         File.WriteAllText(path, JsonConvert.SerializeObject(bpList));
     }
 
+    public static void CacheMapFolder(string mapFolderPath)
+    {
+        MapFolders[mapFolderPath.GetKeyFromMapFolderPath()] = mapFolderPath;
+        FileManager.CopyDirectory(mapFolderPath, Path.Combine(FileManager.mapFolderCacheFolderPath, Path.GetFileName(mapFolderPath)));
+    }
 }
