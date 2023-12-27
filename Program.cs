@@ -14,13 +14,14 @@ public class Program
         Stopwatch stopwatch = Stopwatch.StartNew();
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
         SpotifyClient spotify = await SpotifyPlaylistConverter.CreateSpotifyClient();
-        Console.WriteLine("Spotify and BeatSaver client init complete");
+        Cache.InitializeCache();
+        Console.WriteLine("Init complete");
 
         // Get BP Lists
         List<BPList> filteredBpLists;
         List<BPList> unfilteredBpLists;
         
-        if (true)
+        if (false)
         {
             // load BpLists from cache
             Console.WriteLine("Loading cached pre-filter BpLists");
@@ -32,11 +33,14 @@ public class Program
             (filteredBpLists, unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
             FileManager.CacheBpListsPreFilter(filteredBpLists, unfilteredBpLists);   
         }
+        
+        return;
 
         // start downloading Beatmaps (map info)
         Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = await MapDownloader.DownloadBeatmaps(filteredBpLists, beatSaverApi);
         List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = await MapDownloader.DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
+        FileManager.CacheBeatmaps(Cache.Beatmaps.Values.ToList());
         
         // wait for filtered beatmaps to finish downloading and then filter them
         await downloadFilteredBeatmapsTasks.AwaitAll();

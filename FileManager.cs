@@ -15,11 +15,13 @@ namespace BeatSaberLibraryManager
 		public static string mapsOutputFolderPath {get; }
 		public static string playlistsOutputFolderPath {get; }
 
-		public static string cacheFolderPath { get; }
 
 		#region Cache Paths
-		public static string preFilterBpListsUnfiltered {get; }
-		public static string preFilterBpListsFiltered {get; }
+		public static string cacheFolderPath { get; }
+		public static string preFilterBpListsUnfilteredCacheFolderPath {get; }
+		public static string preFilterBpListsFilteredCacheFolderPath {get; }
+		public static string beatmapsCacheFolderPath {get; }
+		public static string mapZipCacheFolderPath {get; }
 
 		#endregion
 
@@ -32,9 +34,13 @@ namespace BeatSaberLibraryManager
 
 			mapZipTempFolderPath = Path.Combine(outputDirectory, "Temp", "MapZips");
 			imagesTempFolderPath = Path.Combine(outputDirectory, "Temp", "Images");
+			
 			cacheFolderPath = Path.Combine(outputDirectory, "Cache");
-			preFilterBpListsUnfiltered = Path.Combine(cacheFolderPath, "PreFilterBpLists-Unfiltered.json");
-			preFilterBpListsFiltered = Path.Combine(cacheFolderPath, "PreFilterBpLists-Filtered.json");
+			preFilterBpListsUnfilteredCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists-Unfiltered");
+			preFilterBpListsFilteredCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists-Filtered");
+			beatmapsCacheFolderPath = Path.Combine(cacheFolderPath, "Beatmaps");
+			mapZipCacheFolderPath = Path.Combine(cacheFolderPath, "MapZips");
+
 			mapsOutputFolderPath = Path.Combine(outputDirectory, "CustomLevels");
 			playlistsOutputFolderPath = Path.Combine(outputDirectory, "Playlists");
 			
@@ -87,7 +93,13 @@ namespace BeatSaberLibraryManager
 		public static void PrepareWorkingDirectories()
 		{
 			EnsureDirectoryExists(outputDirectory);
+			
 			EnsureDirectoryExists(cacheFolderPath);
+			EnsureDirectoryExists(preFilterBpListsUnfilteredCacheFolderPath);
+			EnsureDirectoryExists(preFilterBpListsFilteredCacheFolderPath);
+			EnsureDirectoryExists(beatmapsCacheFolderPath);
+			EnsureDirectoryExists(mapZipCacheFolderPath);
+
 			ClearOrCreateDirectory(mapsOutputFolderPath);
 			ClearOrCreateDirectory(playlistsOutputFolderPath);
 			ClearOrCreateDirectory(mapZipTempFolderPath);
@@ -119,16 +131,53 @@ namespace BeatSaberLibraryManager
 		
 		public static void CacheBpListsPreFilter(List<BPList> filtered, List<BPList> unfiltered)
 		{
-			File.WriteAllText(preFilterBpListsFiltered, JsonConvert.SerializeObject(filtered));
-			File.WriteAllText(preFilterBpListsUnfiltered, JsonConvert.SerializeObject(unfiltered));
+			foreach (BPList bpList in filtered)
+			{
+				string path = Path.Combine(preFilterBpListsFilteredCacheFolderPath, bpList.playlistTitle.SanitizeForFileName() + ".bplist");
+				File.WriteAllText(path, JsonConvert.SerializeObject(bpList));	
+			}
+			
+			foreach (BPList bpList in unfiltered)
+			{
+				string path = Path.Combine(preFilterBpListsUnfilteredCacheFolderPath, bpList.playlistTitle.SanitizeForFileName() + ".bplist");
+				File.WriteAllText(path, JsonConvert.SerializeObject(bpList));	
+			}
+		}
+
+		public static void CacheBeatmaps(List<Beatmap> beatmaps)
+		{
+			File.WriteAllText(beatmapsCacheFolderPath, JsonConvert.SerializeObject(beatmaps));
+		}
+		public static List<Beatmap> GetCachedBeatmaps()
+		{
+			if (!File.Exists(beatmapsCacheFolderPath))
+			{
+				return new List<Beatmap>();
+			}
+			List<Beatmap>? beatmaps = JsonConvert.DeserializeObject<List<Beatmap>>(File.ReadAllText(beatmapsCacheFolderPath));
+			return beatmaps ?? new List<Beatmap>();
+
 		}
 		
 		public static (List<BPList> filtered, List<BPList> unfiltered) GetCachedPreFilterBpLists()
 		{
-			List<BPList>? filtered = JsonConvert.DeserializeObject<List<BPList>>(File.ReadAllText(preFilterBpListsFiltered)); 
-			List<BPList>? unfiltered = JsonConvert.DeserializeObject<List<BPList>>(File.ReadAllText(preFilterBpListsUnfiltered));
-			Debug.Assert(unfiltered != null, nameof(unfiltered) + " != null");
-			Debug.Assert(filtered != null, nameof(filtered) + " != null");
+			var unfiltered = new List<BPList>();
+			var filtered = new List<BPList>();
+
+			foreach (string filePath in Directory.GetFiles(preFilterBpListsFilteredCacheFolderPath))
+			{
+				var bpList = JsonConvert.DeserializeObject<BPList>(File.ReadAllText(filePath));
+				Debug.Assert(bpList != null, nameof(bpList) + " != null");
+				filtered.Add(bpList);
+			}
+			
+			foreach (string filePath in Directory.GetFiles(preFilterBpListsUnfilteredCacheFolderPath))
+			{
+				var bpList = JsonConvert.DeserializeObject<BPList>(File.ReadAllText(filePath));
+				Debug.Assert(bpList != null, nameof(bpList) + " != null");
+				unfiltered.Add(bpList);
+			}
+
 			return (filtered, unfiltered);
 		}
 	}
