@@ -86,12 +86,12 @@ namespace BeatSaberLibraryManager
 
 		public static void PrepareWorkingDirectories()
 		{
-			ClearOrCreateDirectory(outputDirectory);
+			EnsureDirectoryExists(outputDirectory);
+			EnsureDirectoryExists(cacheFolderPath);
 			ClearOrCreateDirectory(mapsOutputFolderPath);
 			ClearOrCreateDirectory(playlistsOutputFolderPath);
 			ClearOrCreateDirectory(mapZipTempFolderPath);
 			ClearOrCreateDirectory(imagesTempFolderPath);
-			EnsureDirectoryExists(cacheFolderPath);
 		}
 
 		public static void OutputPlaylists(IEnumerable<BPList> playlists)
@@ -121,6 +121,15 @@ namespace BeatSaberLibraryManager
 		{
 			File.WriteAllText(preFilterBpListsFiltered, JsonConvert.SerializeObject(filtered));
 			File.WriteAllText(preFilterBpListsUnfiltered, JsonConvert.SerializeObject(unfiltered));
+		}
+		
+		public static (List<BPList> filtered, List<BPList> unfiltered) GetCachedPreFilterBpLists()
+		{
+			List<BPList>? filtered = JsonConvert.DeserializeObject<List<BPList>>(File.ReadAllText(preFilterBpListsFiltered)); 
+			List<BPList>? unfiltered = JsonConvert.DeserializeObject<List<BPList>>(File.ReadAllText(preFilterBpListsUnfiltered));
+			Debug.Assert(unfiltered != null, nameof(unfiltered) + " != null");
+			Debug.Assert(filtered != null, nameof(filtered) + " != null");
+			return (filtered, unfiltered);
 		}
 	}
 }

@@ -5,19 +5,19 @@ namespace BeatSaberLibraryManager.WebDownload;
 
 public static class MapDownloader
 {
-    public static List<Task<Beatmap?>> DownloadBeatmaps(IEnumerable<BPList> bpLists, BeatSaver beatSaverApi)
+    public static async Task<List<Task<Beatmap?>>> DownloadBeatmaps(IEnumerable<BPList> bpLists, BeatSaver beatSaverApi)
     {
         List<Task<Beatmap?>> beatmapDownloadTasks = new();
         
         foreach (BPList bpList in bpLists)
         {
-            Console.WriteLine("\n" + bpList.playlistTitle + " (" + bpList.songs.Count + " Maps)");
-            Console.WriteLine("============================================");
-            
             foreach (SongInfo songInfo in bpList.songs)
             {
-                Console.WriteLine(songInfo.songName + " - " + songInfo.hash);
-                beatmapDownloadTasks.Add(beatSaverApi.BeatmapByHash(songInfo.hash));
+                Console.WriteLine("Downloading Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
+                Task<Beatmap?> task = beatSaverApi.BeatmapByHash(songInfo.hash);
+                beatmapDownloadTasks.Add(task);
+                await task;
+                Console.WriteLine("\tDownloaded Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
             }
         }
 
