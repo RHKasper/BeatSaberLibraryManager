@@ -64,8 +64,7 @@ namespace BeatSaberLibraryManager.WebDownload
                             Beatmap? bestMap = GetBestMap(fullTrack, searchResults);
                             if (bestMap != null)
                             {
-                                Console.WriteLine($"Track Found For: \"{fullTrack.Name} ({string.Join(", ", fullTrack.Artists.Select(a => a.Name))})\":");
-                                Console.WriteLine($"\t{bestMap.Name}");
+                                Console.WriteLine($"\tMap Found For: \"{fullTrack.Name} ({string.Join(", ", fullTrack.Artists.Select(a => a.Name))})\": {bestMap.Name}");
 
                                 BeatmapVersion version = bestMap.LatestVersion;
                                 bpList.songs.Add(new SongInfo

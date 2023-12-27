@@ -90,7 +90,7 @@ public static class PlaylistGetter
 		if (Cache.PreFilterBpLists.ContainsKey(playlistName))
 		{
 			bpList = Cache.PreFilterBpLists[playlistName];
-			Console.WriteLine("Retrieved from cache, playlist: " + bpList.playlistTitle);
+			Console.WriteLine("Retrieved playlist from cache: " + bpList.playlistTitle);
 		}
 		else
 		{
