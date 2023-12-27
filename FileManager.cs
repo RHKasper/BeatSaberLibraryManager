@@ -8,11 +8,20 @@ namespace BeatSaberLibraryManager
 {
 	public static class FileManager
 	{
+		
 		private static string outputDirectory { get; }
-		public static string mapZipTempPath {get; }
-		public static string imagesTempPath {get; }
+		public static string mapZipTempFolderPath {get; }
+		public static string imagesTempFolderPath {get; }
 		public static string mapsOutputFolderPath {get; }
 		public static string playlistsOutputFolderPath {get; }
+
+		public static string cacheFolderPath { get; }
+
+		#region Cache Paths
+		public static string preFilterBpListsUnfiltered {get; }
+		public static string preFilterBpListsFiltered {get; }
+
+		#endregion
 
 		static FileManager()
 		{
@@ -21,10 +30,15 @@ namespace BeatSaberLibraryManager
 			Debug.Assert(outputDirFromAppConfig != null, " \"OutputDirectory\" must be set in the secrets.json file");
 			outputDirectory = outputDirFromAppConfig;
 
-			mapZipTempPath = Path.Combine(outputDirectory, "Temp", "MapZips");
-			imagesTempPath = Path.Combine(outputDirectory, "Temp", "Images");
+			mapZipTempFolderPath = Path.Combine(outputDirectory, "Temp", "MapZips");
+			imagesTempFolderPath = Path.Combine(outputDirectory, "Temp", "Images");
+			cacheFolderPath = Path.Combine(outputDirectory, "Cache");
+			preFilterBpListsUnfiltered = Path.Combine(cacheFolderPath, "PreFilterBpLists-Unfiltered.json");
+			preFilterBpListsFiltered = Path.Combine(cacheFolderPath, "PreFilterBpLists-Filtered.json");
 			mapsOutputFolderPath = Path.Combine(outputDirectory, "CustomLevels");
 			playlistsOutputFolderPath = Path.Combine(outputDirectory, "Playlists");
+			
+			PrepareWorkingDirectories();
 			Console.WriteLine("Initialized FileManager");
 		}
 
@@ -46,7 +60,6 @@ namespace BeatSaberLibraryManager
 			File.Delete(zipFilePath);
 		}
 
-
 		public static string GetMapDirectory(string zipFilePath)
 		{
 			string targetDir = Path.Combine(mapsOutputFolderPath, Path.GetFileNameWithoutExtension(zipFilePath));
@@ -55,7 +68,7 @@ namespace BeatSaberLibraryManager
 
 		public static string GetZipFilePath(string zipFileName)
 		{
-			string zipFilePath = Path.Combine(mapZipTempPath, zipFileName);
+			string zipFilePath = Path.Combine(mapZipTempFolderPath, zipFileName);
 			foreach (char c in Path.GetInvalidPathChars())
 				zipFileName = zipFileName.Replace(c + "", "");
 			return zipFilePath;
@@ -76,8 +89,9 @@ namespace BeatSaberLibraryManager
 			ClearOrCreateDirectory(outputDirectory);
 			ClearOrCreateDirectory(mapsOutputFolderPath);
 			ClearOrCreateDirectory(playlistsOutputFolderPath);
-			ClearOrCreateDirectory(mapZipTempPath);
-			ClearOrCreateDirectory(imagesTempPath);
+			ClearOrCreateDirectory(mapZipTempFolderPath);
+			ClearOrCreateDirectory(imagesTempFolderPath);
+			EnsureDirectoryExists(cacheFolderPath);
 		}
 
 		public static void OutputPlaylists(IEnumerable<BPList> playlists)
@@ -95,6 +109,18 @@ namespace BeatSaberLibraryManager
 			if (Directory.Exists(path))
 				Directory.Delete(path, true);
 			Directory.CreateDirectory(path);
+		}
+
+		private static void EnsureDirectoryExists(string path)
+		{
+			if (!Directory.Exists(path))
+				Directory.CreateDirectory(path);
+		}
+		
+		public static void CacheBpListsPreFilter(List<BPList> filtered, List<BPList> unfiltered)
+		{
+			File.WriteAllText(preFilterBpListsFiltered, JsonConvert.SerializeObject(filtered));
+			File.WriteAllText(preFilterBpListsUnfiltered, JsonConvert.SerializeObject(unfiltered));
 		}
 	}
 }

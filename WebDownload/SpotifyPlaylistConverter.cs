@@ -104,7 +104,7 @@ namespace BeatSaberLibraryManager.WebDownload
             // Get image URL
             string imageUrl = playlist.Images.First().Url;
 
-            string dir = FileManager.imagesTempPath;
+            string dir = FileManager.imagesTempFolderPath;
             string filename = playlist.Name + " Cover";
 
             // Request Image		

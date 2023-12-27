@@ -15,19 +15,11 @@ public class Program
         BeatSaver beatSaverApi = new(nameof(BeatSaberLibraryManager), new System.Version(0, 1));
         SpotifyClient spotify = await SpotifyPlaylistConverter.CreateSpotifyClient();
         Console.WriteLine("Spotify and BeatSaver client init complete");
-        
-        // download BPLists and wait for them to finish
-        Console.WriteLine("Downloading and generating BeatSaber Playlists");
-        List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaverApi);
-        List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaverApi, spotify);
 
-        // Write all BpList names to the console
-        Console.WriteLine("\n\n==================== Downloaded and Generated Playlists ====================");
-        foreach (BPList bpList in filteredBpLists.Concat(unfilteredBpLists))
-        {
-            Console.WriteLine(bpList.playlistTitle + " (" + bpList.songs.Count + " Maps)");
-        }
-        Console.WriteLine("========================================\n");
+        // Generate BpLists and cache result to file
+        (List<BPList> filteredBpLists, List<BPList> unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
+        FileManager.CacheBpListsPreFilter(filteredBpLists, unfilteredBpLists);
+        return;
         
         // start downloading Beatmaps (map info)
         Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
@@ -44,9 +36,6 @@ public class Program
         List<Beatmap> unfilteredBeatmaps = downloadUnfilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();
         Console.WriteLine("Beatmap downloading and filtering complete.");
 
-        // prep working directories
-        FileManager.PrepareWorkingDirectories();
-        
         // download zip files
         Console.WriteLine("Starting map .zip file downloads");
         await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
@@ -55,6 +44,22 @@ public class Program
         FileManager.OutputPlaylists(filteredBpLists.Concat(unfilteredBpLists));
 
         Console.WriteLine("All tasks complete in " + stopwatch.ElapsedMilliseconds / 1000f + " seconds");
+    }
+
+    private static async Task<(List<BPList> filtered, List<BPList> unfiltered)> GetBpLists(BeatSaver beatSaver, SpotifyClient spotify)
+    {
+        Console.WriteLine("Downloading and generating BeatSaber Playlists");
+        List<BPList> filteredBpLists = await PlaylistGetter.GetFilteredBeatSaverBpLists(beatSaver);
+        List<BPList> unfilteredBpLists = await PlaylistGetter.GetUnfilteredBpLists(beatSaver, spotify);
+
+        // Write all BpList names to the console
+        Console.WriteLine("\n\n==================== Downloaded and Generated Playlists ====================");
+        foreach (BPList bpList in filteredBpLists.Concat(unfilteredBpLists))
+        {
+            Console.WriteLine(bpList.playlistTitle + " (" + bpList.songs.Count + " Maps)");
+        }
+        Console.WriteLine("========================================\n");
+        return (filteredBpLists, unfilteredBpLists);
     }
     
     private static void FilterBeatmaps(List<Beatmap> beatmaps)
