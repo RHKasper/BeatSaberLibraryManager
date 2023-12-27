@@ -47,9 +47,18 @@ namespace BeatSaberLibraryManager.WebDownload
                     // If this is a track (not a podcast episode)
                     if (track.Track is FullTrack fullTrack)
                     {
+                        Beatmap? bestMap = null;
                         requestedTracks++;
-                        Beatmap? bestMap = await GetBestMap(fullTrack, beatSaverApi);
                         
+                        try
+                        {
+                            bestMap = await GetBestMap(fullTrack, beatSaverApi);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("Exception: " + e.Message);
+                        }
+
                         if (bestMap != null)
                         {
                             BeatmapVersion version = bestMap.LatestVersion;
@@ -101,10 +110,11 @@ namespace BeatSaberLibraryManager.WebDownload
             
             Console.WriteLine("Requesting search results for: \"" + fullTrack.Name + " " + fullTrack.Artists.First().Name + "\"");
 
-            if (Cache.SpotifySearchResults.ContainsKey(fullTrack.Id))
+        
+            if (Cache.SpotifySearchResults.TryGetValue(fullTrack.Id, out selectedMap))
             {
-                selectedMap = Cache.SpotifySearchResults[fullTrack.Id];
-                Console.WriteLine("\tFound cached Spotify => BeatSaver search result: " + fullTrack.Name + " => " + (selectedMap == null ? "NULL" : selectedMap.Name));
+                Console.WriteLine("\tFound cached Spotify => BeatSaver search result: " + fullTrack.Name + " => " +
+                                  (selectedMap == null ? "NULL" : selectedMap.Name));
             }
             else
             {
@@ -128,10 +138,12 @@ namespace BeatSaberLibraryManager.WebDownload
 
                     selectedMap = acceptableOptions.Most(beatmap => beatmap.ScoreOverall(fullTrack));
                 }
-                Console.WriteLine("\tDownloaded Spotify => BeatSaver search result: " + fullTrack.Name + " => " + (selectedMap == null ? "NULL" : selectedMap.Name));
+
+                Console.WriteLine("\tDownloaded Spotify => BeatSaver search result: " + fullTrack.Name + " => " +
+                                  (selectedMap == null ? "NULL" : selectedMap.Name));
                 Cache.CacheSpotifySearchResults(fullTrack, selectedMap);
             }
-
+           
             return selectedMap;
         }
 

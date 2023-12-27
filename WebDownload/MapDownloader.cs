@@ -28,21 +28,25 @@ public static class MapDownloader
 
         foreach (Beatmap beatmap in beatmaps)
         {
-            var task = DownloadAndUnzipZipFile(beatmap, beatSaverClient);
-            await task;
+            try
+            {
+                await DownloadAndUnzipZipFile(beatmap, beatSaverClient);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e);
+            }
         }
-
     }
 
-    private static async Task<string?> DownloadAndUnzipZipFile(Beatmap beatmap, BeatSaver beatSaver)
+    private static async Task DownloadAndUnzipZipFile(Beatmap beatmap, BeatSaver beatSaver)
     {
         string mapDirectory = FileManager.GetMapDirectory(beatmap);
         
-        if (Cache.MapFolders.ContainsKey(beatmap.ID))
+        if (Cache.MapFolders.TryGetValue(beatmap.ID, out var cacheFolder))
         {
             Console.WriteLine("\tFound map folder in cache: " + beatmap.Name);
-            FileManager.CopyDirectory(Cache.MapFolders[beatmap.ID], mapDirectory);
-            return Cache.MapFolders[beatmap.ID];
+            FileManager.CopyDirectory(cacheFolder, mapDirectory);
         }
         else
         {
@@ -59,35 +63,39 @@ public static class MapDownloader
                 FileManager.UnzipFile(zipFilePath, mapDirectory);
                 Console.WriteLine("\tUnzipped map to: " + mapDirectory);
                 Cache.CacheMapFolder(mapDirectory);
-                
-                return mapDirectory;
             }
             else
             {
                 Console.WriteLine("Failed to download zip file for " + beatmap.Name);
             }
         }
-
-        return null;
     }
 
     private static async Task<Beatmap?> GetBeatmap(SongInfo songInfo, BeatSaver beatSaverApi)
     {
-        if (Cache.Beatmaps.ContainsKey(songInfo.hash))
+        Beatmap? beatmap = null;
+        try
         {
-            Console.WriteLine("\tBeatmap found in cache for: " + songInfo.songName + " - " + songInfo.hash);
-            return Cache.Beatmaps[songInfo.hash];
-        }
-        else
-        {
-            Console.WriteLine("Downloading Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
-            Beatmap? beatmap = await beatSaverApi.BeatmapByHash(songInfo.hash);
-            if (beatmap != null)
+            if (Cache.Beatmaps.TryGetValue(songInfo.hash, out beatmap))
             {
-                Cache.CacheBeatmap(songInfo, beatmap);
+                Console.WriteLine("\tBeatmap found in cache for: " + songInfo.songName + " - " + songInfo.hash);
             }
-            Console.WriteLine("\tDownloaded Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
-            return beatmap;
+            else
+            {
+                Console.WriteLine("Downloading Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
+                beatmap = await beatSaverApi.BeatmapByHash(songInfo.hash);
+                if (beatmap != null)
+                {
+                    Cache.CacheBeatmap(songInfo, beatmap);
+                }
+
+                Console.WriteLine("\tDownloaded Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
+            }
         }
+        catch (Exception e)
+        {
+            Console.WriteLine("Exception: " + e);
+        }
+        return beatmap;
     }
 }
