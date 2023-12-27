@@ -20,6 +20,7 @@ namespace BeatSaberLibraryManager
 		public static string cacheFolderPath { get; }
 		public static string preFilterBpListsCacheFolderPath {get; }
 		public static string beatmapsCacheFolderPath {get; }
+		public static string spotifySearchCacheFolderPath {get; }
 		public static string mapFolderCacheFolderPath {get; }
 
 		#endregion
@@ -37,6 +38,7 @@ namespace BeatSaberLibraryManager
 			cacheFolderPath = Path.Combine(outputDirectory, "Cache");
 			preFilterBpListsCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists");
 			beatmapsCacheFolderPath = Path.Combine(cacheFolderPath, "Beatmaps");
+			spotifySearchCacheFolderPath = Path.Combine(cacheFolderPath, "SpotifySearchResults");
 			mapFolderCacheFolderPath = Path.Combine(cacheFolderPath, "MapFolders");
 
 			mapsOutputFolderPath = Path.Combine(outputDirectory, "CustomLevels");
@@ -95,6 +97,7 @@ namespace BeatSaberLibraryManager
 			EnsureDirectoryExists(cacheFolderPath);
 			EnsureDirectoryExists(preFilterBpListsCacheFolderPath);
 			EnsureDirectoryExists(beatmapsCacheFolderPath);
+			EnsureDirectoryExists(spotifySearchCacheFolderPath);
 			EnsureDirectoryExists(mapFolderCacheFolderPath);
 
 			ClearOrCreateDirectory(mapsOutputFolderPath);
@@ -108,7 +111,7 @@ namespace BeatSaberLibraryManager
 			foreach (BPList bpList in playlists)
 			{
 				string serializedBpList = JsonConvert.SerializeObject(bpList);
-				string path = Path.Combine(playlistsOutputFolderPath, bpList.playlistTitle + ".bplist");
+				string path = Path.Combine(playlistsOutputFolderPath, bpList.playlistTitle + FileExtensions.BpList);
 				File.WriteAllText(path, serializedBpList);
 			}
 		}
@@ -163,7 +166,7 @@ namespace BeatSaberLibraryManager
 		{
 			Dictionary<string, Beatmap> beatmaps = new Dictionary<string, Beatmap>();
 
-			foreach (string filePath in Directory.GetFiles(beatmapsCacheFolderPath))
+			foreach (string filePath in Directory.GetFiles(beatmapsCacheFolderPath, "*" + FileExtensions.BpList))
 			{
 				Beatmap? beatmap = JsonConvert.DeserializeObject<Beatmap>(File.ReadAllText(filePath));
 				Debug.Assert(beatmap != null, nameof(beatmap) + " != null");
@@ -177,7 +180,7 @@ namespace BeatSaberLibraryManager
 		{
 			Dictionary<string, BPList> cachedBpLists = new Dictionary<string, BPList>();
 			
-			foreach (string filePath in Directory.GetFiles(preFilterBpListsCacheFolderPath))
+			foreach (string filePath in Directory.GetFiles(preFilterBpListsCacheFolderPath, "*" + FileExtensions.BpList))
 			{
 				var bpList = JsonConvert.DeserializeObject<BPList>(File.ReadAllText(filePath));
 				Debug.Assert(bpList != null, nameof(bpList) + " != null");
@@ -197,6 +200,19 @@ namespace BeatSaberLibraryManager
 			}
 
 			return cachedMapFolders;
+		}
+
+		public static Dictionary<string, Beatmap?> GetCachedSpotifySearchResults()
+		{
+			Dictionary<string, Beatmap?> searchResults = new Dictionary<string, Beatmap?>();
+
+			foreach (string filePath in Directory.GetFiles(spotifySearchCacheFolderPath, "*" + FileExtensions.SpotifySearchResult))
+			{
+				Beatmap? beatmap = JsonConvert.DeserializeObject<Beatmap>(File.ReadAllText(filePath));
+				searchResults.Add(Path.GetFileNameWithoutExtension(filePath), beatmap);	
+			}
+
+			return searchResults;
 		}
 	}
 }

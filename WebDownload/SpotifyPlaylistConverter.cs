@@ -48,33 +48,18 @@ namespace BeatSaberLibraryManager.WebDownload
                     if (track.Track is FullTrack fullTrack)
                     {
                         requestedTracks++;
-                        string query = fullTrack.Name + " " + fullTrack.Artists.First().Name;
-                        Console.WriteLine("Searching for: \"" + query + "\"");
-                        SearchTextFilterOption searchFilter = new SearchTextFilterOption
+                        Beatmap? bestMap = await GetBestMap(fullTrack, beatSaverApi);
+                        
+                        if (bestMap != null)
                         {
-                            MaxNPS = MapFilters.MaxNps,
-                            MinRating = MapFilters.MinScoreForManyRatings,
-                            Query = query,
-                            SortOrder = SortingOptions.Relevance,
-                        };
-                        Page? searchResults = await beatSaverApi.SearchBeatmaps(searchFilter);
-
-                        if (searchResults is { Empty: false })
-                        {
-                            Beatmap? bestMap = GetBestMap(fullTrack, searchResults);
-                            if (bestMap != null)
+                            BeatmapVersion version = bestMap.LatestVersion;
+                            bpList.songs.Add(new SongInfo
                             {
-                                Console.WriteLine($"\tMap Found For: \"{fullTrack.Name} ({string.Join(", ", fullTrack.Artists.Select(a => a.Name))})\": {bestMap.Name}");
-
-                                BeatmapVersion version = bestMap.LatestVersion;
-                                bpList.songs.Add(new SongInfo
-                                {
-                                    hash = version.Hash,
-                                    key = version.Key ?? String.Empty,
-                                    songName = bestMap.Name,
-                                });
-                                foundTracks++;
-                            }
+                                hash = version.Hash,
+                                key = version.Key ?? String.Empty,
+                                songName = bestMap.Name,
+                            });
+                            foundTracks++;
                         }
                     }
                 }
@@ -110,25 +95,61 @@ namespace BeatSaberLibraryManager.WebDownload
             return await DownloadUtil.DownloadImageAsync(dir, filename, new Uri(imageUrl));
         }
 
-        public static Beatmap? GetBestMap(FullTrack fullTrack, Page searchResults)
+        public static async Task<Beatmap?> GetBestMap(FullTrack fullTrack, BeatSaver beatSaverApi)
         {
-            List<Beatmap?> acceptableOptions = new List<Beatmap?>();
-            for (int i = searchResults.Beatmaps.Count - 1; i >= 0; i--)
-            {
-                Beatmap? beatmap = searchResults.Beatmaps[i];
-                BeatmapVersion version = beatmap.LatestVersion;
+            Beatmap? selectedMap = null;
+            
+            Console.WriteLine("Requesting map for: \"" + fullTrack.Name + " " + fullTrack.Artists.First().Name + "\"");
 
-                if (!beatmap.FailsAnyQualityFilter() &&
-                    version.HasAnyOfRequestedDifficulties(MapFilters.AcceptableSpotifyDifficulties) &&
-                    beatmap.Name.Contains(fullTrack.Artists.First().Name))
+            if (Cache.SpotifySearchResults.ContainsKey(fullTrack.Id))
+            {
+                selectedMap = Cache.SpotifySearchResults[fullTrack.Id];
+                Console.WriteLine("\tFound cached Spotify => BeatSaver search result: " + fullTrack.Name + " => " + (selectedMap == null ? "NULL" : selectedMap.Name));
+            }
+            else
+            {
+                Page? searchResults = await SearchBeatSaverForTrack(fullTrack, beatSaverApi);
+
+                if (searchResults != null)
                 {
-                    acceptableOptions.Add(beatmap);
+                    List<Beatmap?> acceptableOptions = new List<Beatmap?>();
+                    for (int i = searchResults.Beatmaps.Count - 1; i >= 0; i--)
+                    {
+                        Beatmap? beatmap = searchResults.Beatmaps[i];
+                        BeatmapVersion version = beatmap.LatestVersion;
+
+                        if (!beatmap.FailsAnyQualityFilter() &&
+                            version.HasAnyOfRequestedDifficulties(MapFilters.AcceptableSpotifyDifficulties) &&
+                            beatmap.Name.Contains(fullTrack.Artists.First().Name))
+                        {
+                            acceptableOptions.Add(beatmap);
+                        }
+                    }
+
+                    selectedMap = acceptableOptions.Most(beatmap => beatmap.ScoreOverall(fullTrack));
                 }
+                Console.WriteLine("\tDownloaded Spotify => BeatSaver search result: " + fullTrack.Name + " => " + (selectedMap == null ? "NULL" : selectedMap.Name));
             }
 
-            return acceptableOptions.Most(beatmap => beatmap.ScoreOverall(fullTrack));
+            Cache.CacheSpotifySearchResults(fullTrack, selectedMap);
+            return selectedMap;
         }
-        
+
+        private static async Task<Page?> SearchBeatSaverForTrack(FullTrack fullTrack, BeatSaver beatSaverApi)
+        {
+            string query = fullTrack.Name + " " + fullTrack.Artists.First().Name;
+            SearchTextFilterOption searchFilter = new SearchTextFilterOption
+            {
+                MaxNPS = MapFilters.MaxNps,
+                MinRating = MapFilters.MinScoreForManyRatings,
+                Query = query,
+                SortOrder = SortingOptions.Relevance,
+            };
+
+            Page? searchResults = await beatSaverApi.SearchBeatmaps(searchFilter);
+            return searchResults;
+        }
+
         public static async Task<SpotifyClient> CreateSpotifyClient()
         {
             var config = SpotifyClientConfig.CreateDefault();
