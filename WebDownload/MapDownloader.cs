@@ -81,10 +81,10 @@ public static class MapDownloader
 
     private static async Task<Beatmap?> GetBeatmap(SongInfo songInfo, BeatSaver beatSaverApi)
     {
-        if (Cache.Beatmaps.ContainsKey(songInfo.key))
+        if (Cache.Beatmaps.ContainsKey(songInfo.hash))
         {
             Console.WriteLine("\tBeatmap found in cache for: " + songInfo.songName + " - " + songInfo.hash);
-            return Cache.Beatmaps[songInfo.key];
+            return Cache.Beatmaps[songInfo.hash];
         }
         else
         {
@@ -92,7 +92,7 @@ public static class MapDownloader
             Beatmap? beatmap = await beatSaverApi.BeatmapByHash(songInfo.hash);
             if (beatmap != null)
             {
-                Cache.Beatmaps[songInfo.hash] = beatmap;
+                Cache.CacheBeatmap(songInfo, beatmap);
             }
             Console.WriteLine("\tDownloaded Beatmap for: " + songInfo.songName + " - " + songInfo.hash);
             return beatmap;

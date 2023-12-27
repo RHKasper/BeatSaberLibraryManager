@@ -18,8 +18,7 @@ namespace BeatSaberLibraryManager
 
 		#region Cache Paths
 		public static string cacheFolderPath { get; }
-		public static string preFilterBpListsUnfilteredCacheFolderPath {get; }
-		public static string preFilterBpListsFilteredCacheFolderPath {get; }
+		public static string preFilterBpListsCacheFolderPath {get; }
 		public static string beatmapsCacheFolderPath {get; }
 		public static string mapZipCacheFolderPath {get; }
 
@@ -36,8 +35,7 @@ namespace BeatSaberLibraryManager
 			imagesTempFolderPath = Path.Combine(outputDirectory, "Temp", "Images");
 			
 			cacheFolderPath = Path.Combine(outputDirectory, "Cache");
-			preFilterBpListsUnfilteredCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists-Unfiltered");
-			preFilterBpListsFilteredCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists-Filtered");
+			preFilterBpListsCacheFolderPath = Path.Combine(cacheFolderPath, "PreFilterBpLists");
 			beatmapsCacheFolderPath = Path.Combine(cacheFolderPath, "Beatmaps");
 			mapZipCacheFolderPath = Path.Combine(cacheFolderPath, "MapZips");
 
@@ -95,8 +93,7 @@ namespace BeatSaberLibraryManager
 			EnsureDirectoryExists(outputDirectory);
 			
 			EnsureDirectoryExists(cacheFolderPath);
-			EnsureDirectoryExists(preFilterBpListsUnfilteredCacheFolderPath);
-			EnsureDirectoryExists(preFilterBpListsFilteredCacheFolderPath);
+			EnsureDirectoryExists(preFilterBpListsCacheFolderPath);
 			EnsureDirectoryExists(beatmapsCacheFolderPath);
 			EnsureDirectoryExists(mapZipCacheFolderPath);
 
@@ -128,57 +125,33 @@ namespace BeatSaberLibraryManager
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
 		}
-		
-		public static void CacheBpListsPreFilter(List<BPList> filtered, List<BPList> unfiltered)
+
+		public static Dictionary<string,Beatmap> GetCachedBeatmaps()
 		{
-			foreach (BPList bpList in filtered)
+			Dictionary<string, Beatmap> beatmaps = new Dictionary<string, Beatmap>();
+
+			foreach (string filePath in Directory.GetFiles(beatmapsCacheFolderPath))
 			{
-				string path = Path.Combine(preFilterBpListsFilteredCacheFolderPath, bpList.playlistTitle.SanitizeForFileName() + ".bplist");
-				File.WriteAllText(path, JsonConvert.SerializeObject(bpList));	
+				Beatmap? beatmap = JsonConvert.DeserializeObject<Beatmap>(File.ReadAllText(filePath));
+				Debug.Assert(beatmap != null, nameof(beatmap) + " != null");
+				beatmaps.Add(Path.GetFileNameWithoutExtension(filePath), beatmap);	
 			}
+
+			return beatmaps;
+		}
+		
+		public static Dictionary<string, BPList> GetCachedPreFilterBpLists()
+		{
+			Dictionary<string, BPList> cachedBpLists = new Dictionary<string, BPList>();
 			
-			foreach (BPList bpList in unfiltered)
-			{
-				string path = Path.Combine(preFilterBpListsUnfilteredCacheFolderPath, bpList.playlistTitle.SanitizeForFileName() + ".bplist");
-				File.WriteAllText(path, JsonConvert.SerializeObject(bpList));	
-			}
-		}
-
-		public static void CacheBeatmaps(List<Beatmap> beatmaps)
-		{
-			File.WriteAllText(beatmapsCacheFolderPath, JsonConvert.SerializeObject(beatmaps));
-		}
-		public static List<Beatmap> GetCachedBeatmaps()
-		{
-			if (!File.Exists(beatmapsCacheFolderPath))
-			{
-				return new List<Beatmap>();
-			}
-			List<Beatmap>? beatmaps = JsonConvert.DeserializeObject<List<Beatmap>>(File.ReadAllText(beatmapsCacheFolderPath));
-			return beatmaps ?? new List<Beatmap>();
-
-		}
-		
-		public static (List<BPList> filtered, List<BPList> unfiltered) GetCachedPreFilterBpLists()
-		{
-			var unfiltered = new List<BPList>();
-			var filtered = new List<BPList>();
-
-			foreach (string filePath in Directory.GetFiles(preFilterBpListsFilteredCacheFolderPath))
+			foreach (string filePath in Directory.GetFiles(preFilterBpListsCacheFolderPath))
 			{
 				var bpList = JsonConvert.DeserializeObject<BPList>(File.ReadAllText(filePath));
 				Debug.Assert(bpList != null, nameof(bpList) + " != null");
-				filtered.Add(bpList);
-			}
-			
-			foreach (string filePath in Directory.GetFiles(preFilterBpListsUnfilteredCacheFolderPath))
-			{
-				var bpList = JsonConvert.DeserializeObject<BPList>(File.ReadAllText(filePath));
-				Debug.Assert(bpList != null, nameof(bpList) + " != null");
-				unfiltered.Add(bpList);
+				cachedBpLists.Add(Path.GetFileNameWithoutExtension(filePath), bpList);
 			}
 
-			return (filtered, unfiltered);
+			return cachedBpLists;
 		}
 	}
 }

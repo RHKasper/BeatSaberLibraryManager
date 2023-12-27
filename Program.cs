@@ -21,27 +21,14 @@ public class Program
         List<BPList> filteredBpLists;
         List<BPList> unfilteredBpLists;
         
-        if (false)
-        {
-            // load BpLists from cache
-            Console.WriteLine("Loading cached pre-filter BpLists");
-            (filteredBpLists, unfilteredBpLists) = FileManager.GetCachedPreFilterBpLists();
-        }
-        else
-        {
-            // Generate BpLists and cache result to file
-            (filteredBpLists, unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
-            FileManager.CacheBpListsPreFilter(filteredBpLists, unfilteredBpLists);   
-        }
-        
-        return;
+        // Generate BpLists and cache result to file
+        (filteredBpLists, unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
 
         // start downloading Beatmaps (map info)
         Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
         List<Task<Beatmap?>> downloadFilteredBeatmapsTasks = await MapDownloader.DownloadBeatmaps(filteredBpLists, beatSaverApi);
         List<Task<Beatmap?>> downloadUnfilteredBeatmapsTasks = await MapDownloader.DownloadBeatmaps(unfilteredBpLists, beatSaverApi);
-        FileManager.CacheBeatmaps(Cache.Beatmaps.Values.ToList());
-        
+
         // wait for filtered beatmaps to finish downloading and then filter them
         await downloadFilteredBeatmapsTasks.AwaitAll();
         List<Beatmap> filteredBeatmaps = downloadFilteredBeatmapsTasks.Select(t => t.Result).Where(b => b != null).Cast<Beatmap>().ToList();

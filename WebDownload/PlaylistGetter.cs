@@ -1,4 +1,5 @@
-﻿using BeatSaberLibraryManager.Inputs;
+﻿using System.Diagnostics;
+using BeatSaberLibraryManager.Inputs;
 using BeatSaverSharp;
 using BeatSaverSharp.Models.Pages;
 using Newtonsoft.Json;
@@ -13,25 +14,19 @@ public static class PlaylistGetter
 		List<BPList> bpLists = new List<BPList>();
 
 		//Download beatsaver playlists
-		foreach (int id in Playlists.FilteredBeatSaverPlaylists.Values)
+		foreach (string playlistName in Playlists.FilteredBeatSaverPlaylists.Keys)
 		{
-			BPList? bpList = await GetBeatSaverPlaylist(id, beatSaverApi);
-			if (bpList != null)
-			{
+			BPList? bpList = await GetBpListWithCaching(playlistName, () => GetBeatSaverPlaylist(Playlists.FilteredBeatSaverPlaylists[playlistName], beatSaverApi));
+			if (bpList != null) 
 				bpLists.Add(bpList);
-				Console.WriteLine("Downloaded playlist: " + bpList.playlistTitle);
-			}
 		}
         
 		//Download beatsaver mapper playlists
-		foreach (string url in Playlists.BeatSaverMapperPlaylists.Values)
+		foreach (string playlistName in Playlists.BeatSaverMapperPlaylists.Keys)
 		{
-			BPList? bpList = await GetBeatSaverMapperPlaylist(url);
+			BPList? bpList = await GetBpListWithCaching(playlistName, () => GetBeatSaverMapperPlaylist(Playlists.BeatSaverMapperPlaylists[playlistName]));
 			if (bpList != null)
-			{
 				bpLists.Add(bpList);
-				Console.WriteLine("Downloaded playlist: " + bpList.playlistTitle);
-			}
 		}
 
 		return bpLists;
@@ -39,22 +34,25 @@ public static class PlaylistGetter
 
 	public static async Task<List<BPList>> GetUnfilteredBpLists(BeatSaver beatSaverApi, SpotifyClient spotify)
 	{
-		List<Task<BPList?>> tasks = new();
+		List<BPList> bpLists = new List<BPList>();
 
-		foreach (int id in Playlists.UnfilteredBeatSaverPlaylists.Values)
+		//Download beatsaver playlists
+		foreach (string playlistName in Playlists.UnfilteredBeatSaverPlaylists.Keys)
 		{
-			Task<BPList?> t = GetBeatSaverPlaylist(id, beatSaverApi);
-			tasks.Add(t);
+			BPList? bpList = await GetBpListWithCaching(playlistName, () => GetBeatSaverPlaylist(Playlists.UnfilteredBeatSaverPlaylists[playlistName], beatSaverApi));
+			if (bpList != null)
+				bpLists.Add(bpList);
 		}
 
-		foreach (string spotifyPlaylistUrl in Playlists.SpotifyPlaylistUrls.Values)
+		//Download Spotify playlists
+		foreach (string playlistName in Playlists.SpotifyPlaylistUrls.Keys)
 		{
-			Task<BPList?> t = SpotifyPlaylistConverter.GenerateBeatSaberPlaylist(spotifyPlaylistUrl, beatSaverApi, spotify);
-			tasks.Add(t);
+			BPList? bpList = await GetBpListWithCaching(playlistName, () => SpotifyPlaylistConverter.GenerateBeatSaberPlaylist(Playlists.SpotifyPlaylistUrls[playlistName], beatSaverApi, spotify));
+			if (bpList != null)
+				bpLists.Add(bpList);
 		}
-		
-		await tasks.AwaitAll();
-		return tasks.Where(t => t.Result != null).Cast<Task<BPList>>().Select(task => task.Result).ToList();
+
+		return bpLists;
 	}
 
 	private static async Task<BPList?> GetBeatSaverPlaylist(int id, BeatSaver beatSaverApi)
@@ -84,5 +82,26 @@ public static class PlaylistGetter
 	{
 		string? message = await DownloadUtil.Get(url);
 		return message != null ? JsonConvert.DeserializeObject<BPList>(message) : null;
+	}
+
+	private static async Task<BPList?> GetBpListWithCaching(string playlistName, Func<Task<BPList?>> downloadFunction)
+	{
+		BPList? bpList = null;
+		if (Cache.PreFilterBpLists.ContainsKey(playlistName))
+		{
+			bpList = Cache.PreFilterBpLists[playlistName];
+			Console.WriteLine("Retrieved from cache, playlist: " + bpList.playlistTitle);
+		}
+		else
+		{
+			bpList = await downloadFunction.Invoke();
+			if (bpList != null)
+			{
+				Cache.CacheBpListPreFilter(playlistName, bpList);
+				Console.WriteLine("Downloaded playlist: " + bpList.playlistTitle);
+			}
+		}
+
+		return bpList;
 	}
 }
