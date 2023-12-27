@@ -99,7 +99,7 @@ namespace BeatSaberLibraryManager.WebDownload
         {
             Beatmap? selectedMap = null;
             
-            Console.WriteLine("Requesting map for: \"" + fullTrack.Name + " " + fullTrack.Artists.First().Name + "\"");
+            Console.WriteLine("Requesting search results for: \"" + fullTrack.Name + " " + fullTrack.Artists.First().Name + "\"");
 
             if (Cache.SpotifySearchResults.ContainsKey(fullTrack.Id))
             {
