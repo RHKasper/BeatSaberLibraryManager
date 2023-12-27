@@ -19,7 +19,6 @@ public class Program
         // Generate BpLists and cache result to file
         (List<BPList> filteredBpLists, List<BPList> unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
         FileManager.CacheBpListsPreFilter(filteredBpLists, unfilteredBpLists);
-        return;
         
         // start downloading Beatmaps (map info)
         Console.WriteLine("Downloading Beatmaps (map file metadata) for map filtering");
