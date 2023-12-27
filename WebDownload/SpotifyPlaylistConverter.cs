@@ -129,9 +129,9 @@ namespace BeatSaberLibraryManager.WebDownload
                     selectedMap = acceptableOptions.Most(beatmap => beatmap.ScoreOverall(fullTrack));
                 }
                 Console.WriteLine("\tDownloaded Spotify => BeatSaver search result: " + fullTrack.Name + " => " + (selectedMap == null ? "NULL" : selectedMap.Name));
+                Cache.CacheSpotifySearchResults(fullTrack, selectedMap);
             }
 
-            Cache.CacheSpotifySearchResults(fullTrack, selectedMap);
             return selectedMap;
         }
 
