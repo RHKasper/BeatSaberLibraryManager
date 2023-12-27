@@ -22,7 +22,7 @@ public static class MapDownloader
         return beatmapDownloadTasks;
     }
 
-    public static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps)
+    public static async Task DownloadZipFiles(HashSet<Beatmap> beatmaps, BeatSaver beatSaverClient)
     {
         int maxRetries = 4;
         int msBeforeRetry = 5000;
@@ -31,34 +31,16 @@ public static class MapDownloader
         foreach (Beatmap beatmap in beatmaps)
         {
             Console.WriteLine("Requesting download for " + beatmap.Name);
-            var task = DownloadAndUnzipZipFile(beatmap);
-            
-            //todo implement retries
-            // int retryCount = 0;
-            // int msElapsed = 0;
-            //
-            // while (task.Result == null || retryCount < maxRetries)
-            // {
-            //     if (msElapsed > msBeforeRetry)
-            //     {
-            //         Console.WriteLine("Retrying .zip file download for " + beatmap.Name);
-            //         task = DownloadAndUnzipZipFile(beatmap);
-            //         retryCount++;
-            //         msElapsed = 0;
-            //     }
-            //     await Task.Delay(waitInterval);
-            //     msElapsed += waitInterval;
-            // }
-            
+            var task = DownloadAndUnzipZipFile(beatmap, beatSaverClient);
             await task;
         }
 
         Console.WriteLine("Requested " + beatmaps.Count + " map zip files");
     }
 
-    private static async Task<string?> DownloadAndUnzipZipFile(Beatmap beatmap)
+    private static async Task<string?> DownloadAndUnzipZipFile(Beatmap beatmap, BeatSaver beatSaver)
     {
-        Task<byte[]?> downloadZipContents = beatmap.LatestVersion.DownloadZIP();
+        Task<byte[]?> downloadZipContents = beatSaver.DownloadZIP(beatmap.LatestVersion);
         await downloadZipContents;
 
         if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })

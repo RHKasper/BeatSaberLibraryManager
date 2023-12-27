@@ -41,7 +41,7 @@ public class Program
 
         // download zip files
         Console.WriteLine("Starting map .zip file downloads");
-        await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet());
+        await MapDownloader.DownloadZipFiles(unfilteredBeatmaps.Concat(filteredBeatmaps).ToHashSet(), beatSaverApi);
         
         // Output map folders and playlist files
         FileManager.OutputPlaylists(filteredBpLists.Concat(unfilteredBpLists));

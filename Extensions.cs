@@ -1,4 +1,7 @@
-﻿namespace BeatSaberLibraryManager;
+﻿using System.Reflection;
+using BeatSaverSharp;
+
+namespace BeatSaberLibraryManager;
 
 public static class Extensions
 {
