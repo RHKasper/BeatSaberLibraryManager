@@ -166,7 +166,7 @@ namespace BeatSaberLibraryManager
 		{
 			Dictionary<string, Beatmap> beatmaps = new Dictionary<string, Beatmap>();
 
-			foreach (string filePath in Directory.GetFiles(beatmapsCacheFolderPath, "*" + FileExtensions.BpList))
+			foreach (string filePath in Directory.GetFiles(beatmapsCacheFolderPath, "*" + FileExtensions.Beatmap))
 			{
 				Beatmap? beatmap = JsonConvert.DeserializeObject<Beatmap>(File.ReadAllText(filePath));
 				Debug.Assert(beatmap != null, nameof(beatmap) + " != null");
