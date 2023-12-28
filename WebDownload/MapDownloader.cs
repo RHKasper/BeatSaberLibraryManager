@@ -53,7 +53,7 @@ public static class MapDownloader
             Console.WriteLine("Downloading .zip byte[] for " + beatmap.Name);
 
             Task<byte[]?> downloadZipContents = beatSaver.DownloadZIP(beatmap.LatestVersion);
-            await downloadZipContents;
+            await Task.WhenAny(downloadZipContents, Task.Delay(3000));
 
             if (downloadZipContents is { IsCompletedSuccessfully: true, Result: not null })
             {
@@ -66,7 +66,7 @@ public static class MapDownloader
             }
             else
             {
-                Console.WriteLine("Failed to download zip file for " + beatmap.Name);
+                Console.WriteLine("Download zip file timed out (5s) for " + beatmap.Name);
             }
         }
     }
