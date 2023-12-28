@@ -111,7 +111,7 @@ namespace BeatSaberLibraryManager
 			foreach (BPList bpList in playlists)
 			{
 				string serializedBpList = JsonConvert.SerializeObject(bpList);
-				string path = Path.Combine(playlistsOutputFolderPath, bpList.playlistTitle + FileExtensions.BpList);
+				string path = Path.Combine(playlistsOutputFolderPath, bpList.playlistTitle.SanitizeForFileName() + FileExtensions.BpList);
 				File.WriteAllText(path, serializedBpList);
 			}
 		}
