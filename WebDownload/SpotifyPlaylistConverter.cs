@@ -10,6 +10,7 @@ namespace BeatSaberLibraryManager.WebDownload
 {
     public static class SpotifyPlaylistConverter
     {
+        private const int SearchTimeoutMs = 3000;
         public static async Task<BPList?> GenerateBeatSaberPlaylist(string spotifyPlaylistUrl, BeatSaver beatSaverApi,
             SpotifyClient spotify)
         {
@@ -52,7 +53,14 @@ namespace BeatSaberLibraryManager.WebDownload
                         
                         try
                         {
-                            bestMap = await GetBestMap(fullTrack, beatSaverApi);
+                            var task = GetBestMap(fullTrack, beatSaverApi);
+                            await Task.WhenAny(task, Task.Delay(SearchTimeoutMs));
+                            if (!task.IsCompleted)
+                            {
+                                throw new TimeoutException("Spotify => BeatSaver search timed out after " + (SearchTimeoutMs) + " ms");
+                            }
+
+                            bestMap = task.Result;
                         }
                         catch (Exception e)
                         {

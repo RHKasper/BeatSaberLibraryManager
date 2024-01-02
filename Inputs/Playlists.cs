@@ -35,5 +35,6 @@ public class Playlists
 		{ "Robert's Edm Mix", "https://open.spotify.com/playlist/5tY88XWKaUArUISNkY697j?si=3afb235dac594189" },
 		{ "Robert's Rock Mix", "https://open.spotify.com/playlist/43jMBPZVR5cdD7Cw1gZF8j?si=9a990d1647eb4cde" },
 		{ "All Likes", "https://open.spotify.com/playlist/5Zi1NzMK91ImLODGEWHNqS?si=bcde847d6766403f" },
+		{ "Top EDM Hits of the 2010s", "https://open.spotify.com/playlist/2vHE1sFqVHx3lYwBFyFZcY?si=cb06b0ca293a4847" },
 	};
 }
