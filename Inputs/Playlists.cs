@@ -1,6 +1,6 @@
 ﻿namespace BeatSaberLibraryManager.Inputs;
 
-public class Playlists
+public static class Playlists
 {
 	public static readonly Dictionary<string, int> UnfilteredBeatSaverPlaylists = new()
 	{
@@ -10,13 +10,10 @@ public class Playlists
 
 	public static readonly Dictionary<string, int> FilteredBeatSaverPlaylists = new()
 	{
-		{ "Ajr NeoTheater", 171573 },
 		{ "Skillet", 85217 },
-		{ "Linkin Park", 12144 },
 		{ "KDA", 70553 },
 		{ "BTS", 70543 },
 		{ "Alphabeat", 8441 },
-		{ "Curator's Picks Dubstep", 242180 },
 		{ "Curator's Picks Modcharts", 173546 },
 	};
 
@@ -30,11 +27,14 @@ public class Playlists
 
 	public static readonly Dictionary<string, string> SpotifyPlaylistUrls = new()
 	{
-		{ "Robert's Epic Mix", "https://open.spotify.com/playlist/6QTGBDOzjxnkfQ9X6OmWIY?si=9d82829900c84462" },
-		{ "Robert's Pop Mix", "https://open.spotify.com/playlist/7vSZ2b4591qCZhi8bn2xkn?si=4a570e22013747fa" },
-		{ "Robert's Edm Mix", "https://open.spotify.com/playlist/5tY88XWKaUArUISNkY697j?si=3afb235dac594189" },
-		{ "Robert's Rock Mix", "https://open.spotify.com/playlist/43jMBPZVR5cdD7Cw1gZF8j?si=9a990d1647eb4cde" },
-		{ "All Likes", "https://open.spotify.com/playlist/5Zi1NzMK91ImLODGEWHNqS?si=bcde847d6766403f" },
+		{ "Robert's Liked Spotify Songs", "https://open.spotify.com/playlist/5Zi1NzMK91ImLODGEWHNqS?si=bcde847d6766403f" },
 		{ "Top EDM Hits of the 2010s", "https://open.spotify.com/playlist/2vHE1sFqVHx3lYwBFyFZcY?si=cb06b0ca293a4847" },
+		{ "2000s Emo & Pop Punk", "https://open.spotify.com/playlist/52DEJKt18LNbFy46ldKkfY?si=595b9e88464b4dc8" },
+		{ "Epic Soundtracks from Movies and Games", "https://open.spotify.com/playlist/5OsCLnvSitOlJNGaQRBV5R?si=87611a1981ab4537" },
+		{ "Monster Cat - Best of All Time", "https://open.spotify.com/playlist/5WMYEm92RFVtcemp3i2rQS?si=522782c0de94435f" },
+		{ "Pop Bangers 2000-2023", "https://open.spotify.com/playlist/5nYj43JXdyVx0yAtY5OVFP?si=a6c883a1f02f40ea" },
+		{ "Melodic Dubstep", "https://open.spotify.com/playlist/6Qu7co7czjjXwSEuCyCOAD?si=0bf4298744614c20" },
+		{ "Pop EDM", "https://open.spotify.com/playlist/6PCw4kIBtHKueRCaJdzU7o?si=eda496d95575471b" },
+		{ "Disney Hits", "https://open.spotify.com/playlist/37i9dQZF1DX8C9xQcOrE6T?si=6e3537894b6c4349" },
 	};
 }
