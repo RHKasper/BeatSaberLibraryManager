@@ -36,5 +36,6 @@ public static class Playlists
 		{ "Melodic Dubstep", "https://open.spotify.com/playlist/6Qu7co7czjjXwSEuCyCOAD?si=0bf4298744614c20" },
 		{ "Pop EDM", "https://open.spotify.com/playlist/6PCw4kIBtHKueRCaJdzU7o?si=eda496d95575471b" },
 		{ "Disney Hits", "https://open.spotify.com/playlist/37i9dQZF1DX8C9xQcOrE6T?si=6e3537894b6c4349" },
+		{ "KPOP HITS (ALL TIME) 2010-2023", "https://open.spotify.com/playlist/3Ir5YWemOTGRRfXgROrsDV?si=fa163cd889b743d9" },
 	};
 }
