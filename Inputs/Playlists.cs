@@ -11,8 +11,6 @@ public static class Playlists
 	public static readonly Dictionary<string, int> FilteredBeatSaverPlaylists = new()
 	{
 		{ "Skillet", 85217 },
-		{ "KDA", 70553 },
-		{ "BTS", 70543 },
 		{ "Alphabeat", 8441 },
 		{ "Curator's Picks Modcharts", 173546 },
 	};
