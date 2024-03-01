@@ -20,8 +20,6 @@ public class Program
         // Get BP Lists
         List<BPList> filteredBpLists;
         List<BPList> unfilteredBpLists;
-        
-        // Generate BpLists and cache result to file
         (filteredBpLists, unfilteredBpLists) = await GetBpLists(beatSaverApi, spotify);
 
         // start downloading Beatmaps (map info)
