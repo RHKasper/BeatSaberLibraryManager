@@ -12,7 +12,9 @@ public static class Cache
     /// </summary>
     public static Dictionary<string, BPList> PreFilterBpLists {get; private set;}
     
-    // hash => Beatmap
+    /// <summary>
+    /// hash => Beatmap 
+    /// </summary>
     public static Dictionary<string, Beatmap> Beatmaps {get; private set;}
     
     /// <summary>
